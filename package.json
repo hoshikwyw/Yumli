@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "migrate": "node --env-file=.env scripts/migrate-from-old-project.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
