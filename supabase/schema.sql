@@ -1,3 +1,7 @@
+-- SUPERSEDED: do not run this on the shared project. Its policies let anyone
+-- with the public anon key change recipes, categories and images, and its
+-- tables would land in the public schema. Use shared_project_setup.sql.
+
 -- =============================================
 -- Yumli Database Schema
 -- Run this in Supabase SQL Editor
