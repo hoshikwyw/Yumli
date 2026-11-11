@@ -10,7 +10,7 @@ import type { Recipe, Category } from '../../types';
 type Tab = 'recipes' | 'categories';
 
 export default function Dashboard() {
-  const { isLoggedIn, logout } = useAuth();
+  const { isLoggedIn, checking, logout } = useAuth();
   const navigate = useNavigate();
   const { colors } = useTheme();
 
@@ -29,9 +29,10 @@ export default function Dashboard() {
   const [catError, setCatError] = useState('');
 
   useEffect(() => {
+    if (checking) return;
     if (!isLoggedIn) { navigate('/admin/login'); return; }
     loadData();
-  }, [isLoggedIn, navigate]);
+  }, [checking, isLoggedIn, navigate]);
 
   const loadData = async () => {
     setLoading(true);
@@ -68,7 +69,7 @@ export default function Dashboard() {
       const cats = await recipeService.getCategories();
       setCategories(cats);
     } catch (err: any) {
-      setCatError(err.message?.includes('duplicate') ? 'Category already exists' : err.message || 'Failed to create');
+      setCatError(err.message?.includes('already used') ? 'Category already exists' : err.message || 'Failed to create');
     }
     setCatSaving(false);
   };
@@ -90,7 +91,7 @@ export default function Dashboard() {
       const cats = await recipeService.getCategories();
       setCategories(cats);
     } catch (err: any) {
-      setCatError(err.message?.includes('duplicate') ? 'Name already taken' : err.message || 'Failed to update');
+      setCatError(err.message?.includes('already used') ? 'Name already taken' : err.message || 'Failed to update');
     }
     setCatSaving(false);
   };
@@ -109,7 +110,7 @@ export default function Dashboard() {
     setDeleting(null);
   };
 
-  const handleLogout = () => { logout(); navigate('/'); };
+  const handleLogout = async () => { await logout(); navigate('/'); };
 
   const recipeCountForCat = (catName: string) => recipes.filter((r) => r.category === catName).length;
 

@@ -9,18 +9,24 @@ export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const { colors } = useTheme();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
     setError('');
-    if (login(username, password)) {
-      navigate('/admin');
-    } else {
-      setError('Wrong credentials');
+    setSubmitting(true);
+    try {
+      const failure = await login(username, password);
+      if (failure) setError(failure);
+      else navigate('/admin');
+    } catch {
+      setError('Could not reach the server. Try again.');
     }
+    setSubmitting(false);
   };
 
   return (
@@ -66,8 +72,8 @@ export default function Login() {
             </p>
           )}
 
-          <Button variant="primary" size="md" type="submit" style={{ width: '100%' }}>
-            ENTER
+          <Button variant="primary" size="md" type="submit" style={{ width: '100%' }} disabled={submitting}>
+            {submitting ? 'CHECKING...' : 'ENTER'}
           </Button>
         </form>
       </Card>

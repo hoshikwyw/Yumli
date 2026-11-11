@@ -41,7 +41,9 @@ export const POST = handle(async (request) => {
   const supabase = await db();
   const { error } = await supabase.storage.from(IMAGE_BUCKET).upload(path, bytes, {
     contentType: type,
-    cacheControl: '31536000', // names are unique, so a file never changes
+    // Names are unique, so a file never changes; but a deleted image stays
+    // viewable from the CDN's copy until this runs out, so keep it short.
+    cacheControl: '86400',
     upsert: false,
   });
   if (error) throw new Error(`Upload failed: ${error.message}`);

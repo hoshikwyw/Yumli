@@ -1,77 +1,62 @@
-import { supabase } from '../lib/supabase';
 import type { Recipe, Category } from '../types';
 
-// Fetch all recipes (from the view that joins with categories)
-export async function getRecipes(): Promise<Recipe[]> {
-  const { data, error } = await supabase
-    .from('recipes_with_category')
-    .select('*')
-    .order('created_at', { ascending: false });
+/**
+ * All data goes through Yumli's own API (`/api/*`, see the `api/` folder).
+ * The browser holds no Supabase key: the database is private, and only the
+ * server can reach it. Admin requests carry the login cookie automatically.
+ */
 
-  if (error) throw error;
-  return data ?? [];
+export class ApiError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
 }
 
-// Fetch featured recipes only
-export async function getFeaturedRecipes(): Promise<Recipe[]> {
-  const { data, error } = await supabase
-    .from('recipes_with_category')
-    .select('*')
-    .eq('is_featured', true)
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return data ?? [];
+async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const res = await fetch(`/api/${path}`, { credentials: 'same-origin', ...init });
+  const body = await res.json().catch(() => null);
+  if (!res.ok) throw new ApiError(res.status, body?.error ?? `Request failed (${res.status})`);
+  return body as T;
 }
 
-// Fetch a single recipe by ID
+const send = <T>(path: string, method: string, data?: unknown) =>
+  api<T>(path, {
+    method,
+    headers: data === undefined ? undefined : { 'Content-Type': 'application/json' },
+    body: data === undefined ? undefined : JSON.stringify(data),
+  });
+
+// ── Reads (public) ──
+
+export const getRecipes = () => api<Recipe[]>('recipes');
+
+export const getFeaturedRecipes = () => api<Recipe[]>('recipes?featured=1');
+
 export async function getRecipeById(id: string): Promise<Recipe | null> {
-  const { data, error } = await supabase
-    .from('recipes_with_category')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error) return null;
-  return data;
+  try {
+    return await api<Recipe>(`recipes?id=${encodeURIComponent(id)}`);
+  } catch (error) {
+    // An unknown or malformed id is "not found", not a failure.
+    if (error instanceof ApiError && (error.status === 404 || error.status === 400)) return null;
+    throw error;
+  }
 }
 
-// Search recipes by query string
-export async function searchRecipes(query: string): Promise<Recipe[]> {
-  const { data, error } = await supabase
-    .from('recipes_with_category')
-    .select('*')
-    .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
-    .order('created_at', { ascending: false });
+export const searchRecipes = (query: string) =>
+  api<Recipe[]>(`recipes?q=${encodeURIComponent(query)}`);
 
-  if (error) throw error;
-  return data ?? [];
-}
+export const getRecipesByCategory = (category: string) =>
+  api<Recipe[]>(`recipes?category=${encodeURIComponent(category)}`);
 
-// Fetch recipes by category name
-export async function getRecipesByCategory(category: string): Promise<Recipe[]> {
-  const { data, error } = await supabase
-    .from('recipes_with_category')
-    .select('*')
-    .eq('category', category)
-    .order('created_at', { ascending: false });
+export const getCategories = () => api<Category[]>('categories');
 
-  if (error) throw error;
-  return data ?? [];
-}
+/** The recipe as stored, for the edit form. The public view carries every field it needs. */
+export const getRawRecipeById = getRecipeById;
 
-// Fetch all categories
-export async function getCategories(): Promise<Category[]> {
-  const { data, error } = await supabase
-    .from('categories')
-    .select('*')
-    .order('name');
-
-  if (error) throw error;
-  return data ?? [];
-}
-
-// ── Write operations (admin) ──
+// ── Writes (admin) ──
 
 export interface RecipeInput {
   title: string;
@@ -89,74 +74,77 @@ export interface RecipeInput {
   youtube_link: string | null;
 }
 
-// ── Image upload ──
+export const createRecipe = async (input: RecipeInput): Promise<void> => {
+  await send('recipes', 'POST', input);
+};
 
-const BUCKET = 'recipe-images';
+export const updateRecipe = async (id: string, input: RecipeInput): Promise<void> => {
+  await send(`recipes?id=${encodeURIComponent(id)}`, 'PUT', input);
+};
+
+export const deleteRecipe = async (id: string): Promise<void> => {
+  await send(`recipes?id=${encodeURIComponent(id)}`, 'DELETE');
+};
+
+export const createCategory = async (name: string): Promise<void> => {
+  await send('categories', 'POST', { name });
+};
+
+export const updateCategory = async (id: string, name: string): Promise<void> => {
+  await send(`categories?id=${encodeURIComponent(id)}`, 'PUT', { name });
+};
+
+export const deleteCategory = async (id: string): Promise<void> => {
+  await send(`categories?id=${encodeURIComponent(id)}`, 'DELETE');
+};
+
+// ── Images (admin) ──
+
+const MAX_EDGE = 1600;
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+const UPLOADABLE = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+/**
+ * Shrink a photo before upload: at most 1600px on its longest side, saved as
+ * WebP. A phone photo drops from several MB to a few hundred KB, which keeps
+ * it under the server's 4 MB limit and makes recipe pages load faster.
+ * GIFs are sent as they are, since redrawing one would stop its animation.
+ */
+async function shrinkImage(file: File): Promise<Blob> {
+  if (file.type === 'image/gif') return file;
+
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch {
+    throw new Error(`${file.name} is not an image this browser can read. Use JPEG, PNG or WebP.`);
+  }
+
+  const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+
+  const webp = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/webp', 0.85));
+  // Keep the original if re-encoding did not help (a small, already-compressed file).
+  if (!webp || (UPLOADABLE.includes(file.type) && file.size <= webp.size)) return file;
+  return webp;
+}
 
 export async function uploadImage(file: File): Promise<string> {
-  const ext = file.name.split('.').pop() ?? 'jpg';
-  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const path = `uploads/${fileName}`;
+  const image = await shrinkImage(file);
+  if (image.size > MAX_UPLOAD_BYTES) throw new Error(`${file.name} is still over 4 MB after shrinking`);
 
-  const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
-    cacheControl: '3600',
-    upsert: false,
+  const { url } = await api<{ url: string }>('images', {
+    method: 'POST',
+    headers: { 'Content-Type': image.type },
+    body: image,
   });
-  if (error) throw error;
-
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+  return url;
 }
 
-export async function deleteImage(url: string): Promise<void> {
-  // Extract path from the full public URL
-  const match = url.match(/recipe-images\/(.+)$/);
-  if (!match) return;
-  const { error } = await supabase.storage.from(BUCKET).remove([match[1]]);
-  if (error) throw error;
-}
-
-export async function createRecipe(input: RecipeInput): Promise<void> {
-  const { error } = await supabase.from('recipes').insert(input);
-  if (error) throw error;
-}
-
-export async function updateRecipe(id: string, input: Partial<RecipeInput>): Promise<void> {
-  const { error } = await supabase.from('recipes').update({ ...input, updated_at: new Date().toISOString() }).eq('id', id);
-  if (error) throw error;
-}
-
-export async function deleteRecipe(id: string): Promise<void> {
-  const { error } = await supabase.from('recipes').delete().eq('id', id);
-  if (error) throw error;
-}
-
-// ── Category write operations ──
-
-export async function createCategory(name: string): Promise<void> {
-  const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-  const { error } = await supabase.from('categories').insert({ name, slug });
-  if (error) throw error;
-}
-
-export async function updateCategory(id: string, name: string): Promise<void> {
-  const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-  const { error } = await supabase.from('categories').update({ name, slug }).eq('id', id);
-  if (error) throw error;
-}
-
-export async function deleteCategory(id: string): Promise<void> {
-  const { error } = await supabase.from('categories').delete().eq('id', id);
-  if (error) throw error;
-}
-
-// Fetch a raw recipe (from recipes table, not the view) for editing
-export async function getRawRecipeById(id: string) {
-  const { data, error } = await supabase
-    .from('recipes')
-    .select('*')
-    .eq('id', id)
-    .single();
-  if (error) return null;
-  return data;
-}
+export const deleteImage = async (url: string): Promise<void> => {
+  await send(`images?url=${encodeURIComponent(url)}`, 'DELETE');
+};

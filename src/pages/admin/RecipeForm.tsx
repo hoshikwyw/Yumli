@@ -13,7 +13,7 @@ const MAX_IMAGES = 3;
 export default function RecipeForm() {
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, checking } = useAuth();
   const navigate = useNavigate();
   const { colors } = useTheme();
   const { categories } = useCategories();
@@ -23,6 +23,7 @@ export default function RecipeForm() {
   const [loading, setLoading] = useState(isEdit);
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [removedImages, setRemovedImages] = useState<string[]>([]);
 
   const [form, setForm] = useState<RecipeInput>({
     title: '',
@@ -41,6 +42,7 @@ export default function RecipeForm() {
   });
 
   useEffect(() => {
+    if (checking) return;
     if (!isLoggedIn) { navigate('/admin/login'); return; }
     if (isEdit && id) {
       recipeService.getRawRecipeById(id).then((data) => {
@@ -64,7 +66,7 @@ export default function RecipeForm() {
         setLoading(false);
       });
     }
-  }, [isLoggedIn, isEdit, id, navigate]);
+  }, [checking, isLoggedIn, isEdit, id, navigate]);
 
   const updateField = <K extends keyof RecipeInput>(key: K, value: RecipeInput[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -128,7 +130,7 @@ export default function RecipeForm() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleRemoveImage = async (index: number) => {
+  const handleRemoveImage = (index: number) => {
     const url = form.images[index];
     setForm((prev) => {
       const newImages = prev.images.filter((_, i) => i !== index);
@@ -138,8 +140,9 @@ export default function RecipeForm() {
         image: newImages[0] ?? '',
       };
     });
-    // Try to delete from storage (non-blocking)
-    try { await recipeService.deleteImage(url); } catch { /* ok */ }
+    // Deleted from storage only once the recipe is saved: until then the
+    // saved recipe still shows it, and Cancel must leave it intact.
+    setRemovedImages((prev) => [...prev, url]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -170,6 +173,13 @@ export default function RecipeForm() {
       } else {
         await recipeService.createRecipe(clean);
       }
+      // Now that the recipe no longer uses them, clear removed images out of
+      // storage. Best effort: a leftover file costs space, not correctness.
+      await Promise.all(
+        removedImages
+          .filter((url) => !clean.images.includes(url))
+          .map((url) => recipeService.deleteImage(url).catch(() => {})),
+      );
       navigate('/admin');
     } catch (err: any) {
       setError(err.message || 'Something went wrong');

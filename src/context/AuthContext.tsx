@@ -1,39 +1,41 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import * as authService from '../services/authService';
 
 interface AuthContextType {
   isLoggedIn: boolean;
-  login: (username: string, password: string) => boolean;
-  logout: () => void;
+  /** True until the server has said whether the session cookie is valid. */
+  checking: boolean;
+  /** Resolves to an error message, or null when the login worked. */
+  login: (username: string, password: string) => Promise<string | null>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const STORAGE_KEY = 'yumli_auth';
-const VALID_USER = 'kayv';
-const VALID_PASS = 'Psw1712';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    try { return localStorage.getItem(STORAGE_KEY) === 'true'; }
-    catch { return false; }
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [checking, setChecking] = useState(true);
 
-  const login = (username: string, password: string): boolean => {
-    if (username === VALID_USER && password === VALID_PASS) {
-      setIsLoggedIn(true);
-      localStorage.setItem(STORAGE_KEY, 'true');
-      return true;
-    }
-    return false;
+  useEffect(() => {
+    authService.checkSession()
+      .then(setIsLoggedIn)
+      .catch(() => setIsLoggedIn(false))
+      .finally(() => setChecking(false));
+  }, []);
+
+  const login = async (username: string, password: string) => {
+    const error = await authService.login(username, password);
+    setIsLoggedIn(!error);
+    return error;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await authService.logout().catch(() => {});
     setIsLoggedIn(false);
-    localStorage.removeItem(STORAGE_KEY);
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, checking, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
