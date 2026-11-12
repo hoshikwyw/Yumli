@@ -2,11 +2,18 @@ import { useTranslation } from 'react-i18next';
 import { Button, Container, PixelArt, type SpriteName } from '@/components/ui';
 import { ArrowRightIcon } from '@/components/ui/icons';
 
-/* Decorative food pictures: a tidy row of three on phones, an overlapping collage from tablet up. */
-const tiles: { icon: SpriteName; tone: string; position: string }[] = [
-  { icon: 'pot', tone: 'bg-warm-soft', position: 'md:top-0 md:right-0 md:w-44 md:h-44 lg:w-64 lg:h-64' },
-  { icon: 'fish', tone: 'bg-accent-soft', position: 'md:bottom-0 md:left-[18%] md:w-36 md:h-36 lg:w-52 lg:h-52' },
-  { icon: 'noodles', tone: 'bg-secondary-soft', position: 'md:top-6 md:left-[6%] md:w-20 md:h-20 lg:w-28 lg:h-28' },
+/*
+ * Four food stickers. Each sits on a solid brand colour, not a "soft" tint:
+ * solid colours look the same in light and dark mode, so the pictures stay
+ * bright on a dark page. From tablet width up the tiles tilt a little, like
+ * stickers pressed onto a page; the picture inside is turned back the same
+ * amount (`level`), because pixel art looks ragged when it is rotated.
+ */
+const tiles: { icon: SpriteName; tone: string; tilt: string; level: string }[] = [
+  { icon: 'pot', tone: 'bg-warm', tilt: 'md:-rotate-3', level: 'md:rotate-3' },
+  { icon: 'noodles', tone: 'bg-secondary', tilt: 'md:rotate-2', level: 'md:-rotate-2' },
+  { icon: 'fish', tone: 'bg-accent', tilt: 'md:rotate-3', level: 'md:-rotate-3' },
+  { icon: 'toast', tone: 'bg-primary', tilt: 'md:-rotate-2', level: 'md:rotate-2' },
 ];
 
 /**
@@ -19,7 +26,7 @@ export default function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-bg pixel-hearts">
       <Container className="py-10 sm:py-14 md:py-20">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="text-center md:text-left">
             <p className="text-eyebrow text-secondary-ink">{t('hero.tagline')}</p>
             <h1 className="text-display text-ink mt-3">
@@ -37,20 +44,23 @@ export default function HeroSection() {
             </div>
           </div>
 
-          <div
-            aria-hidden="true"
-            className="grid grid-cols-3 gap-3 sm:gap-4 w-full max-w-sm mx-auto md:max-w-none md:block md:relative md:h-80 lg:h-[420px]"
-          >
-            {tiles.map((tile) => (
-              <div
-                key={tile.icon}
-                className={`relative aspect-square md:aspect-auto md:absolute pixel-box ${tile.tone} ${tile.position}`}
-              >
-                {/* Inset, not padding: percentage padding would be measured against the whole collage */}
-                <PixelArt name={tile.icon} className="absolute inset-[10%] w-[80%] h-[80%]" />
-              </div>
-            ))}
-            <PixelArt name="toast" className="hidden md:block absolute bottom-8 right-[12%] w-12 h-12 animate-float" />
+          {/* One row of four on phones; a 2x2 sticker sheet beside the text from tablet up */}
+          <div aria-hidden="true" className="relative w-full max-w-sm mx-auto md:max-w-[26rem] md:mr-0 lg:mr-8">
+            <div className="grid grid-cols-4 md:grid-cols-2 gap-3 sm:gap-4 md:gap-7">
+              {tiles.map((tile) => (
+                <div
+                  key={tile.icon}
+                  className={`relative aspect-square pixel-box transition-transform duration-300 md:hover:scale-105 ${tile.tone} ${tile.tilt}`}
+                >
+                  {/* Inset, not padding: percentage padding is measured against the grid, not the tile */}
+                  <PixelArt name={tile.icon} className={`absolute inset-[12%] w-[76%] h-[76%] ${tile.level}`} />
+                </div>
+              ))}
+            </div>
+
+            {/* Loose stickers around the sheet: only where there is room for them */}
+            <PixelArt name="heart" className="hidden md:block absolute -top-8 -right-4 w-12 h-12 animate-float" />
+            <PixelArt name="star" className="hidden md:block absolute -bottom-8 -left-5 w-12 h-12 animate-float [animation-delay:-1.5s]" />
           </div>
         </div>
       </Container>
