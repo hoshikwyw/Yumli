@@ -28,15 +28,26 @@ const EMPTY_FORM: RecipeInput = {
   youtube_link: '',
 };
 
-type FieldErrors = Partial<Record<'title' | 'description' | 'category_id' | 'images', string>>;
+type FieldErrors = Partial<Record<
+  'title' | 'description' | 'category_id' | 'images' | 'prep_time' | 'cook_time' | 'ingredients' | 'instructions',
+  string
+>>;
 
-/** What must be filled in before a recipe can be saved, with the message for each gap. */
+/**
+ * What must be filled in before a recipe can be saved, with the message for
+ * each gap. It mirrors the server's rules (api/_lib/validate.ts), so the admin
+ * sees every problem at once instead of one server error at a time.
+ */
 function validate(form: RecipeInput): FieldErrors {
   const errors: FieldErrors = {};
   if (!form.title.trim()) errors.title = 'Give the recipe a name.';
   if (!form.description.trim()) errors.description = 'Add a short description.';
   if (!form.category_id) errors.category_id = 'Choose a category.';
   if (form.images.length === 0) errors.images = 'Add at least one photo.';
+  if (!form.prep_time.trim()) errors.prep_time = 'Add a prep time.';
+  if (!form.cook_time.trim()) errors.cook_time = 'Add a cook time.';
+  if (!form.ingredients.some((item) => item.trim())) errors.ingredients = 'Add at least one ingredient.';
+  if (!form.instructions.some((item) => item.trim())) errors.instructions = 'Add at least one step.';
   return errors;
 }
 
@@ -56,11 +67,13 @@ export default function RecipeForm() {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState('');
   const [removedImages, setRemovedImages] = useState<string[]>([]);
+  /** Photos uploaded in this visit: they belong to no saved recipe until Save succeeds. */
+  const [newUploads, setNewUploads] = useState<string[]>([]);
 
   useEffect(() => {
     if (!id) return;
     let stale = false;
-    recipeService.getRecipeById(id)
+    recipeService.getRecipeById(id, { fresh: true })
       .then((data) => {
         if (stale) return;
         if (!data) { setLoadState('missing'); return; }
@@ -117,7 +130,10 @@ export default function RecipeForm() {
       setFormError(`Upload failed: ${errorMessage(error)}`);
     }
     // Keep whatever did upload, even if a later file failed.
-    if (uploaded.length > 0) setImages([...form.images, ...uploaded]);
+    if (uploaded.length > 0) {
+      setImages([...form.images, ...uploaded]);
+      setNewUploads((prev) => [...prev, ...uploaded]);
+    }
     setUploading(false);
   };
 
@@ -132,9 +148,18 @@ export default function RecipeForm() {
     setImages([form.images[index], ...form.images.filter((_, i) => i !== index)]);
   };
 
+  /**
+   * Ask before throwing work away. On yes, photos uploaded in this visit are
+   * removed from storage too: nothing refers to them, so they would sit there forever.
+   */
+  const confirmDiscard = () => {
+    if (dirty && !confirm('Discard your changes?')) return false;
+    for (const url of newUploads) void recipeService.deleteImage(url).catch(() => {});
+    return true;
+  };
+
   const handleCancel = () => {
-    if (dirty && !confirm('Discard your changes?')) return;
-    navigate('/admin');
+    if (confirmDiscard()) navigate('/admin');
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -208,7 +233,7 @@ export default function RecipeForm() {
     <Container size="md" className="py-4 sm:py-8">
       <BackLink
         to="/admin"
-        onClick={(e) => { if (dirty && !confirm('Discard your changes?')) e.preventDefault(); }}
+        onClick={(e) => { if (!confirmDiscard()) e.preventDefault(); }}
       >
         Dashboard
       </BackLink>
@@ -259,12 +284,14 @@ export default function RecipeForm() {
               value={form.prep_time}
               onChange={(e) => updateField('prep_time', e.target.value)}
               placeholder="10 min"
+              error={errors.prep_time}
             />
             <Input
               label="Cook time"
               value={form.cook_time}
               onChange={(e) => updateField('cook_time', e.target.value)}
               placeholder="20 min"
+              error={errors.cook_time}
             />
             <Input
               label="Servings"
@@ -313,6 +340,7 @@ export default function RecipeForm() {
           onChange={(items) => updateField('ingredients', items)}
           placeholder={() => 'e.g. 1 cup flour'}
           addLabel="+ Add ingredient"
+          error={errors.ingredients}
         />
 
         <ListEditor
@@ -323,6 +351,7 @@ export default function RecipeForm() {
           onChange={(items) => updateField('instructions', items)}
           placeholder={(i) => `Step ${i + 1}`}
           addLabel="+ Add step"
+          error={errors.instructions}
         />
 
         {/* Video */}

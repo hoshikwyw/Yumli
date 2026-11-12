@@ -7,7 +7,8 @@ import type { Category, Recipe } from '@/types';
 interface CategoryManagerProps {
   categories: Category[];
   recipes: Recipe[];
-  onChanged: (categories: Category[]) => void;
+  /** Called after a category was added, renamed or deleted, so the lists can be reloaded. */
+  onChanged: () => void;
   onError: (message: string) => void;
 }
 
@@ -26,9 +27,7 @@ export default function CategoryManager({ categories, recipes, onChanged, onErro
   const [editError, setEditError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const recipeCount = (name: string) => recipes.filter((r) => r.category === name).length;
-
-  const refresh = async () => onChanged(await recipeService.getCategories());
+  const recipeCount = (categoryId: string) => recipes.filter((r) => r.category_id === categoryId).length;
 
   const handleAdd = async () => {
     const name = newName.trim();
@@ -38,7 +37,7 @@ export default function CategoryManager({ categories, recipes, onChanged, onErro
     try {
       await recipeService.createCategory(name);
       setNewName('');
-      await refresh();
+      onChanged();
     } catch (error) {
       setAddError(categoryError(error));
     }
@@ -59,7 +58,7 @@ export default function CategoryManager({ categories, recipes, onChanged, onErro
     try {
       await recipeService.updateCategory(id, name);
       setEditingId(null);
-      await refresh();
+      onChanged();
     } catch (error) {
       setEditError(categoryError(error));
     }
@@ -67,7 +66,7 @@ export default function CategoryManager({ categories, recipes, onChanged, onErro
   };
 
   const handleDelete = async (category: Category) => {
-    const count = recipeCount(category.name);
+    const count = recipeCount(category.id);
     const question = count > 0
       ? `"${category.name}" has ${count} recipe(s). Deleting it leaves them without a category. Continue?`
       : `Delete category "${category.name}"?`;
@@ -76,7 +75,7 @@ export default function CategoryManager({ categories, recipes, onChanged, onErro
     onError('');
     try {
       await recipeService.deleteCategory(category.id);
-      onChanged(categories.filter((c) => c.id !== category.id));
+      onChanged();
     } catch (error) {
       onError(`Could not delete "${category.name}": ${errorMessage(error)}`);
     }
@@ -110,7 +109,7 @@ export default function CategoryManager({ categories, recipes, onChanged, onErro
       ) : (
         <ul className="space-y-3">
           {categories.map((category) => {
-            const count = recipeCount(category.name);
+            const count = recipeCount(category.id);
             const isEditing = editingId === category.id;
 
             return (

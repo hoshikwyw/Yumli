@@ -31,9 +31,56 @@ const send = <T>(path: string, method: string, data?: unknown) =>
 
 // ── Reads (public) ──
 
-export const getRecipes = () => api<Recipe[]>('recipes');
+/**
+ * The server never lets the recipe and category lists be cached, so without
+ * this every page would download them again. They are remembered here for a
+ * short while: moving Home -> Recipes -> a recipe costs one request, not three.
+ * Any admin write forgets them, and the admin screens always ask for fresh data.
+ */
+const LIST_TTL_MS = 60_000;
 
-export async function getRecipeById(id: string): Promise<Recipe | null> {
+interface ReadOptions {
+  /** Skip the short-lived memory and ask the server: for admin screens, which must show the truth. */
+  fresh?: boolean;
+}
+
+function remembered<T>(load: () => Promise<T>) {
+  let entry: { at: number; promise: Promise<T> } | null = null;
+
+  const get = ({ fresh = false }: ReadOptions = {}): Promise<T> => {
+    if (!fresh && entry && Date.now() - entry.at < LIST_TTL_MS) return entry.promise;
+    const mine = { at: Date.now(), promise: load() };
+    entry = mine;
+    // A failed request must not be remembered, or "Try again" would replay the failure.
+    mine.promise.catch(() => { if (entry === mine) entry = null; });
+    return mine.promise;
+  };
+
+  return {
+    get,
+    /** The remembered value if there is a current one, without asking the server. */
+    peek: () => (entry && Date.now() - entry.at < LIST_TTL_MS ? entry.promise.catch(() => null) : Promise.resolve(null)),
+    forget: () => { entry = null; },
+  };
+}
+
+const recipeList = remembered(() => api<Recipe[]>('recipes'));
+const categoryList = remembered(() => api<Category[]>('categories'));
+
+/** Called after every admin write: recipes carry their category's name, so either kind of change affects both lists. */
+const forgetLists = () => {
+  recipeList.forget();
+  categoryList.forget();
+};
+
+export const getRecipes = (options?: ReadOptions) => recipeList.get(options);
+
+export async function getRecipeById(id: string, { fresh = false }: ReadOptions = {}): Promise<Recipe | null> {
+  if (!fresh) {
+    // Coming from a list, the recipe is already here: show it without waiting.
+    const known = (await recipeList.peek())?.find((recipe) => recipe.id === id);
+    if (known) return known;
+  }
   try {
     return await api<Recipe>(`recipes?id=${encodeURIComponent(id)}`);
   } catch (error) {
@@ -43,7 +90,7 @@ export async function getRecipeById(id: string): Promise<Recipe | null> {
   }
 }
 
-export const getCategories = () => api<Category[]>('categories');
+export const getCategories = (options?: ReadOptions) => categoryList.get(options);
 
 // ── Writes (admin) ──
 
@@ -65,26 +112,32 @@ export interface RecipeInput {
 
 export const createRecipe = async (input: RecipeInput): Promise<void> => {
   await send('recipes', 'POST', input);
+  forgetLists();
 };
 
 export const updateRecipe = async (id: string, input: RecipeInput): Promise<void> => {
   await send(`recipes?id=${encodeURIComponent(id)}`, 'PUT', input);
+  forgetLists();
 };
 
 export const deleteRecipe = async (id: string): Promise<void> => {
   await send(`recipes?id=${encodeURIComponent(id)}`, 'DELETE');
+  forgetLists();
 };
 
 export const createCategory = async (name: string): Promise<void> => {
   await send('categories', 'POST', { name });
+  forgetLists();
 };
 
 export const updateCategory = async (id: string, name: string): Promise<void> => {
   await send(`categories?id=${encodeURIComponent(id)}`, 'PUT', { name });
+  forgetLists();
 };
 
 export const deleteCategory = async (id: string): Promise<void> => {
   await send(`categories?id=${encodeURIComponent(id)}`, 'DELETE');
+  forgetLists();
 };
 
 // ── Images (admin) ──

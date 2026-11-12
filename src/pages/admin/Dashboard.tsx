@@ -22,12 +22,13 @@ export default function Dashboard() {
   /** Problem with the last action (delete, add, rename), shown above the lists. */
   const [actionError, setActionError] = useState('');
 
-  /** Bumped by "Try again" to run the load once more. */
+  /** Bumped to run the load once more: by "Try again", and after a category changes. */
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let stale = false;
-    Promise.all([recipeService.getRecipes(), recipeService.getCategories()])
+    // Always from the server: the dashboard must show what is really saved.
+    Promise.all([recipeService.getRecipes({ fresh: true }), recipeService.getCategories({ fresh: true })])
       .then(([r, c]) => {
         if (stale) return;
         setRecipes(r);
@@ -45,6 +46,9 @@ export default function Dashboard() {
     setLoading(true);
     setAttempt((n) => n + 1);
   };
+
+  /** Reload quietly, keeping the lists on screen: a renamed category also changes the name on every recipe row. */
+  const reload = () => setAttempt((n) => n + 1);
 
   const handleDeleteRecipe = async (recipe: Recipe) => {
     if (!confirm(`Delete "${recipe.title}"? This cannot be undone.`)) return;
@@ -112,7 +116,7 @@ export default function Dashboard() {
           <CategoryManager
             categories={categories}
             recipes={recipes}
-            onChanged={setCategories}
+            onChanged={reload}
             onError={setActionError}
           />
         )}

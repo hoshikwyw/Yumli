@@ -7,13 +7,8 @@ import { PageHeader, Container, Button, Chip, StateMessage, fieldClasses } from 
 import LoadError from '@/features/recipes/components/LoadError';
 import { CloseIcon, HeartIcon, SearchIcon } from '@/components/ui/icons';
 import RecipeGrid from '@/features/recipes/components/RecipeGrid';
-import { categoryEmoji, isQuick } from '@/features/recipes/utils';
+import { categoryEmoji, filterRecipes } from '@/features/recipes/utils';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import type { Recipe } from '@/types';
-
-/** Everything a visitor might type to find a recipe, in one lowercase string. */
-const searchText = (recipe: Recipe) =>
-  [recipe.title, recipe.description, recipe.category, ...(recipe.ingredients ?? [])].join(' ').toLowerCase();
 
 /**
  * The recipe list. Search and filters live in the URL
@@ -56,17 +51,12 @@ export default function Recipes() {
   const categories = [...new Map(recipes.filter((r) => r.category).map((r) => [r.category, r.category_slug])).entries()]
     .sort(([a], [b]) => a.localeCompare(b));
 
-  const needle = query.trim().toLowerCase();
-  const filtered = recipes.filter(
-    (recipe) =>
-      (!needle || searchText(recipe).includes(needle)) &&
-      (!category || recipe.category === category) &&
-      (!quickOnly || isQuick(recipe)) &&
-      (!savedOnly || isFavorite(recipe.id)),
-  );
+  const filtered = filterRecipes(recipes, { query, category, quickOnly, savedIds: savedOnly ? favorites : null });
 
-  // "Saved" with no other filter and nothing saved needs its own explanation.
-  const nothingSaved = savedOnly && favorites.length === 0;
+  // Count only saved recipes that still exist: one deleted since it was saved must not inflate the number.
+  const savedCount = loading || error ? favorites.length : recipes.filter((r) => isFavorite(r.id)).length;
+  // "Saved" with nothing saved needs its own explanation, not "no results".
+  const nothingSaved = savedOnly && savedCount === 0;
 
   return (
     <div className="bg-bg">
@@ -122,7 +112,7 @@ export default function Recipes() {
             <Chip selected={savedOnly} onClick={() => setFilters({ saved: savedOnly ? null : '1' })}>
               <HeartIcon className="w-4 h-4" fill={savedOnly ? 'currentColor' : 'none'} />
               {t('recipes.saved')}
-              {favorites.length > 0 && <span className="font-bold">({favorites.length})</span>}
+              {savedCount > 0 && <span className="font-bold">({savedCount})</span>}
             </Chip>
           </div>
         </Container>

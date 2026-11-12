@@ -57,7 +57,7 @@ export default function AdminLayout() {
         </div>
       </header>
 
-      <main>
+      <main id="main" tabIndex={-1} className="outline-none">
         <Outlet />
       </main>
     </div>

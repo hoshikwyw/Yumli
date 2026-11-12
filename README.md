@@ -69,6 +69,14 @@ in a signed, HttpOnly cookie. Writes without it are refused.
    npm run dev
    ```
 
+4. Before committing, run the checks:
+
+   ```bash
+   npm run lint    # code style and React rules
+   npm test        # unit tests (Vitest)
+   npm run build   # type-check and production build
+   ```
+
 ### Database (one-time, in the shared Supabase project)
 
 1. The project's own lock-down script must have run first (it creates
