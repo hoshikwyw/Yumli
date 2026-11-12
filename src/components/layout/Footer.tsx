@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Logo } from '@/components/ui';
 import { pageNavItems } from './navItems';
 
 /**
@@ -17,7 +18,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10">
           {/* Brand */}
           <div>
-            <span className="font-pixel text-primary text-base tracking-wide">Yumli</span>
+            <Logo nameClassName="text-white" />
             <p className="mt-3 text-base text-[#C9C2D6] whitespace-pre-line max-w-sm">
               {t('footer.tagline')}
             </p>

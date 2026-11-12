@@ -1,7 +1,7 @@
 import { Link, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useTheme } from '@/features/theme/ThemeContext';
-import { Badge, Button } from '@/components/ui';
+import { Badge, Button, Logo } from '@/components/ui';
 import { MoonIcon, SunIcon } from '@/components/ui/icons';
 
 /**
@@ -36,9 +36,8 @@ export default function AdminLayout() {
     <div className="min-h-dvh bg-bg">
       <header className="sticky top-0 z-40 bg-surface border-b-[3px] border-line pt-safe">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
-          <Link to="/admin" className="flex items-center gap-2 min-h-11 no-underline shrink-0">
-            <span className="text-2xl" aria-hidden="true">🍳</span>
-            <span className="hidden sm:inline font-pixel text-primary text-sm tracking-wide">Yumli</span>
+          <Link to="/admin" aria-label="Yumli admin" className="flex items-center gap-2 min-h-11 no-underline shrink-0">
+            <Logo nameClassName="hidden sm:inline text-ink" />
             <Badge variant="secondary">Admin</Badge>
           </Link>
 

@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/features/theme/ThemeContext';
 import { GlobeIcon, MoonIcon, SunIcon } from '@/components/ui/icons';
+import { Logo } from '@/components/ui';
 import { pageNavItems } from './navItems';
 
 /* Square 44px control: big enough to hit first time on a phone. */
@@ -27,10 +28,7 @@ export default function Header() {
     <header className="sticky top-0 z-40 bg-surface border-b-[3px] border-line pt-safe">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-3">
         <Link to="/" className="flex items-center gap-2 shrink-0 min-h-11 no-underline" aria-label="Yumli">
-          <span className="text-2xl" aria-hidden="true">🍳</span>
-          <span className="font-pixel text-primary text-sm sm:text-base tracking-wide" aria-hidden="true">
-            Yumli
-          </span>
+          <Logo nameClassName="text-ink" />
         </Link>
 
         <div className="flex items-center gap-2 sm:gap-3">

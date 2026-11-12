@@ -13,7 +13,7 @@ export default function NotFound() {
           <div className="font-pixel text-primary text-5xl sm:text-7xl leading-none" aria-hidden="true">
             404
           </div>
-          <div className="text-5xl mt-5" aria-hidden="true">🍳</div>
+          <img src="/favicon.svg" alt="" width={64} height={64} className="w-16 h-16 mx-auto mt-6" />
           <h1 className="text-title text-ink mt-5">{t('notFound.title')}</h1>
           <p className="text-lead text-ink-soft mt-3">{t('notFound.text')}</p>
           <div className="flex flex-col sm:flex-row gap-3 sm:justify-center mt-7">

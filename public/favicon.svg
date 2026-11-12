@@ -1,61 +1,88 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- Soft circle background matching the logo -->
-  <defs>
-    <radialGradient id="bg" cx="50%" cy="45%" r="50%">
-      <stop offset="0%" stop-color="#FFF5EE"/>
-      <stop offset="100%" stop-color="#FFE4D6"/>
-    </radialGradient>
-    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#FF9B70" stop-opacity="0.15"/>
-      <stop offset="100%" stop-color="#FF9B70" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-
-  <!-- Outer shadow circle -->
-  <circle cx="256" cy="262" r="230" fill="#E8D5C8" opacity="0.4"/>
-  <!-- Main circle bg -->
-  <circle cx="256" cy="256" r="230" fill="url(#bg)"/>
-  <!-- Warm glow -->
-  <circle cx="256" cy="256" r="200" fill="url(#glow)"/>
-
-  <!-- Frying pan -->
-  <ellipse cx="256" cy="240" rx="95" ry="85" fill="#8B7355" opacity="0.15"/>
-  <ellipse cx="256" cy="235" rx="90" ry="80" fill="#F5E6D3"/>
-  <ellipse cx="256" cy="232" rx="78" ry="68" fill="#FFFFFF"/>
-  <!-- Pan handle -->
-  <rect x="340" y="218" width="70" height="16" rx="8" fill="#D4A574"/>
-  <rect x="340" y="222" width="70" height="8" rx="4" fill="#C4956A"/>
-
-  <!-- Egg in pan -->
-  <ellipse cx="240" cy="225" rx="30" ry="26" fill="#FFFFFF"/>
-  <circle cx="242" cy="222" r="13" fill="#FFD98E"/>
-  <circle cx="240" cy="220" r="4" fill="#FFFFFF" opacity="0.6"/>
-
-  <!-- Steam puffs -->
-  <circle cx="220" cy="155" r="12" fill="#FF7B7B" opacity="0.12"/>
-  <circle cx="250" cy="140" r="16" fill="#FF7B7B" opacity="0.1"/>
-  <circle cx="280" cy="148" r="10" fill="#FF7B7B" opacity="0.12"/>
-  <circle cx="235" cy="130" r="8" fill="#FFB8A8" opacity="0.15"/>
-  <circle cx="268" cy="125" r="11" fill="#FFB8A8" opacity="0.1"/>
-
-  <!-- Small heart -->
-  <path d="M290 195 C290 190, 295 186, 299 190 C303 186, 308 190, 308 195 C308 201, 299 207, 299 207 C299 207, 290 201, 290 195Z" fill="#FF7B7B" opacity="0.7"/>
-
-  <!-- Small star sparkle left -->
-  <path d="M170 190 L173 180 L176 190 L186 193 L176 196 L173 206 L170 196 L160 193Z" fill="#FFD98E" opacity="0.5"/>
-
-  <!-- Small star sparkle right -->
-  <path d="M330 170 L332 163 L334 170 L341 172 L334 174 L332 181 L330 174 L323 172Z" fill="#FFD98E" opacity="0.4"/>
-
-  <!-- Text: Yumli -->
-  <text x="256" y="345" text-anchor="middle" font-family="'Nunito', Arial, sans-serif" font-weight="800" font-size="38" fill="#FF7B7B" letter-spacing="1">
-    Yumli
-  </text>
-
-  <!-- Small subtitle dots -->
-  <circle cx="216" cy="370" r="4" fill="#FFD4D4"/>
-  <circle cx="236" cy="370" r="4" fill="#B8A9E8" opacity="0.6"/>
-  <circle cx="256" cy="370" r="4" fill="#7ECFB3" opacity="0.6"/>
-  <circle cx="276" cy="370" r="4" fill="#FFD98E" opacity="0.6"/>
-  <circle cx="296" cy="370" r="4" fill="#FFD4D4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
+<title>Yumli</title>
+<rect x="0" y="1" width="16" height="1" fill="#FF7B7B"/>
+<rect x="0" y="2" width="5" height="1" fill="#FF7B7B"/>
+<rect x="5" y="2" width="5" height="1" fill="#2B2B3D"/>
+<rect x="10" y="2" width="6" height="1" fill="#FF7B7B"/>
+<rect x="0" y="3" width="3" height="1" fill="#FF7B7B"/>
+<rect x="3" y="3" width="2" height="1" fill="#2B2B3D"/>
+<rect x="5" y="3" width="5" height="1" fill="#FFFFFF"/>
+<rect x="10" y="3" width="2" height="1" fill="#2B2B3D"/>
+<rect x="12" y="3" width="4" height="1" fill="#FF7B7B"/>
+<rect x="0" y="4" width="2" height="1" fill="#FF7B7B"/>
+<rect x="2" y="4" width="1" height="1" fill="#2B2B3D"/>
+<rect x="3" y="4" width="9" height="1" fill="#FFFFFF"/>
+<rect x="12" y="4" width="2" height="1" fill="#2B2B3D"/>
+<rect x="14" y="4" width="2" height="1" fill="#FF7B7B"/>
+<rect x="0" y="5" width="1" height="1" fill="#FF7B7B"/>
+<rect x="1" y="5" width="1" height="1" fill="#2B2B3D"/>
+<rect x="2" y="5" width="4" height="1" fill="#FFFFFF"/>
+<rect x="6" y="5" width="1" height="1" fill="#FFC94D"/>
+<rect x="7" y="5" width="1" height="1" fill="#FFF1B8"/>
+<rect x="8" y="5" width="2" height="1" fill="#FFC94D"/>
+<rect x="10" y="5" width="4" height="1" fill="#FFFFFF"/>
+<rect x="14" y="5" width="1" height="1" fill="#2B2B3D"/>
+<rect x="15" y="5" width="1" height="1" fill="#FF7B7B"/>
+<rect x="0" y="6" width="1" height="1" fill="#FF7B7B"/>
+<rect x="1" y="6" width="1" height="1" fill="#2B2B3D"/>
+<rect x="2" y="6" width="3" height="1" fill="#FFFFFF"/>
+<rect x="5" y="6" width="6" height="1" fill="#FFC94D"/>
+<rect x="11" y="6" width="3" height="1" fill="#FFFFFF"/>
+<rect x="14" y="6" width="1" height="1" fill="#2B2B3D"/>
+<rect x="15" y="6" width="1" height="1" fill="#E85D5D"/>
+<rect x="0" y="7" width="1" height="1" fill="#FF7B7B"/>
+<rect x="1" y="7" width="1" height="1" fill="#2B2B3D"/>
+<rect x="2" y="7" width="3" height="1" fill="#FFFFFF"/>
+<rect x="5" y="7" width="1" height="1" fill="#FFC94D"/>
+<rect x="6" y="7" width="1" height="1" fill="#2B2B3D"/>
+<rect x="7" y="7" width="2" height="1" fill="#FFC94D"/>
+<rect x="9" y="7" width="1" height="1" fill="#2B2B3D"/>
+<rect x="10" y="7" width="1" height="1" fill="#FFC94D"/>
+<rect x="11" y="7" width="3" height="1" fill="#FFFFFF"/>
+<rect x="14" y="7" width="1" height="1" fill="#2B2B3D"/>
+<rect x="15" y="7" width="1" height="1" fill="#E85D5D"/>
+<rect x="0" y="8" width="1" height="1" fill="#FF7B7B"/>
+<rect x="1" y="8" width="1" height="1" fill="#2B2B3D"/>
+<rect x="2" y="8" width="3" height="1" fill="#FFFFFF"/>
+<rect x="5" y="8" width="2" height="1" fill="#FFC94D"/>
+<rect x="7" y="8" width="2" height="1" fill="#2B2B3D"/>
+<rect x="9" y="8" width="2" height="1" fill="#FFC94D"/>
+<rect x="11" y="8" width="3" height="1" fill="#FFFFFF"/>
+<rect x="14" y="8" width="1" height="1" fill="#2B2B3D"/>
+<rect x="15" y="8" width="1" height="1" fill="#E85D5D"/>
+<rect x="0" y="9" width="1" height="1" fill="#FF7B7B"/>
+<rect x="1" y="9" width="1" height="1" fill="#2B2B3D"/>
+<rect x="2" y="9" width="3" height="1" fill="#FFFFFF"/>
+<rect x="5" y="9" width="5" height="1" fill="#FFC94D"/>
+<rect x="10" y="9" width="1" height="1" fill="#F5A623"/>
+<rect x="11" y="9" width="3" height="1" fill="#FFFFFF"/>
+<rect x="14" y="9" width="1" height="1" fill="#2B2B3D"/>
+<rect x="15" y="9" width="1" height="1" fill="#E85D5D"/>
+<rect x="0" y="10" width="2" height="1" fill="#FF7B7B"/>
+<rect x="2" y="10" width="1" height="1" fill="#2B2B3D"/>
+<rect x="3" y="10" width="3" height="1" fill="#FFFFFF"/>
+<rect x="6" y="10" width="4" height="1" fill="#F5A623"/>
+<rect x="10" y="10" width="3" height="1" fill="#FFFFFF"/>
+<rect x="13" y="10" width="1" height="1" fill="#2B2B3D"/>
+<rect x="14" y="10" width="2" height="1" fill="#E85D5D"/>
+<rect x="0" y="11" width="2" height="1" fill="#FF7B7B"/>
+<rect x="2" y="11" width="1" height="1" fill="#2B2B3D"/>
+<rect x="3" y="11" width="9" height="1" fill="#FFFFFF"/>
+<rect x="12" y="11" width="1" height="1" fill="#2B2B3D"/>
+<rect x="13" y="11" width="2" height="1" fill="#E85D5D"/>
+<rect x="15" y="11" width="1" height="1" fill="#FF7B7B"/>
+<rect x="0" y="12" width="3" height="1" fill="#FF7B7B"/>
+<rect x="3" y="12" width="2" height="1" fill="#2B2B3D"/>
+<rect x="5" y="12" width="5" height="1" fill="#FFFFFF"/>
+<rect x="10" y="12" width="2" height="1" fill="#2B2B3D"/>
+<rect x="12" y="12" width="2" height="1" fill="#E85D5D"/>
+<rect x="14" y="12" width="2" height="1" fill="#FF7B7B"/>
+<rect x="0" y="13" width="4" height="1" fill="#FF7B7B"/>
+<rect x="4" y="13" width="1" height="1" fill="#E85D5D"/>
+<rect x="5" y="13" width="5" height="1" fill="#2B2B3D"/>
+<rect x="10" y="13" width="3" height="1" fill="#E85D5D"/>
+<rect x="13" y="13" width="3" height="1" fill="#FF7B7B"/>
+<rect x="0" y="14" width="6" height="1" fill="#FF7B7B"/>
+<rect x="6" y="14" width="5" height="1" fill="#E85D5D"/>
+<rect x="11" y="14" width="5" height="1" fill="#FF7B7B"/>
 </svg>

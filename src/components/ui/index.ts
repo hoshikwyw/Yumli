@@ -9,3 +9,4 @@ export { default as Select } from './Select';
 export { default as StateMessage } from './StateMessage';
 export { default as Chip } from './Chip';
 export { default as BackLink } from './BackLink';
+export { default as Logo } from './Logo';
