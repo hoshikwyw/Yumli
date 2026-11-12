@@ -1,4 +1,4 @@
-import { CheckIcon } from '../icons';
+import { CheckIcon } from '@/components/ui/icons';
 
 /*
  * Both lists are made of real checkboxes, hidden visually and drawn with CSS

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
-import { PageHeader, Container, Card } from '../components/common';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { PageHeader, Container, Card } from '@/components/ui';
 
 const features = [
   { emoji: '🍽️', titleKey: 'about.feature1Title', descKey: 'about.feature1Desc', variant: 'pastel-pink' },

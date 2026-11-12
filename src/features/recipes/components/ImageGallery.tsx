@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, RecipeImage } from '../common';
+import { Card } from '@/components/ui';
+import RecipeImage from './RecipeImage';
 
 interface ImageGalleryProps {
   images: string[];

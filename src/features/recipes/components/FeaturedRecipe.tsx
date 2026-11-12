@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import type { Recipe } from '../types';
-import { coverImage } from '../utils/recipe';
-import { Button, Card, Container, RecipeImage, Skeleton } from './common';
-import { ClockIcon, PeopleIcon } from './icons';
+import type { Recipe } from '@/types';
+import { coverImage } from '@/features/recipes/utils';
+import { Button, Card, Container, Skeleton } from '@/components/ui';
+import RecipeImage from './RecipeImage';
+import RecipeMeta from './RecipeMeta';
 
 interface FeaturedRecipeProps {
   /** Leave out while the recipes are still loading: a placeholder of the same size is shown. */
@@ -28,20 +29,7 @@ export default function FeaturedRecipe({ recipe }: FeaturedRecipeProps) {
               <p className="text-eyebrow text-primary-ink">{t('home.featuredLabel')}</p>
               <h2 className="text-heading text-ink mt-2">{recipe.title}</h2>
               <p className="text-lead text-ink-soft mt-3 line-clamp-4">{recipe.description}</p>
-              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-base font-semibold text-ink-soft">
-                {recipe.prep_time && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <ClockIcon className="w-5 h-5" />
-                    <span className="sr-only">{t('card.prepTime')}:</span>
-                    {recipe.prep_time}
-                  </span>
-                )}
-                <span className="inline-flex items-center gap-1.5">
-                  <PeopleIcon className="w-5 h-5" />
-                  <span className="sr-only">{t('card.serves')}:</span>
-                  {recipe.servings}
-                </span>
-              </div>
+              <RecipeMeta recipe={recipe} size="md" className="mt-4" />
               <Button to={`/recipes/${recipe.id}`} variant="primary" className="mt-6 w-full sm:w-auto">
                 {t('recipes.letsCook')}
               </Button>

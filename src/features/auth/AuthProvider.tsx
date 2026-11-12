@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import * as authService from '../services/authService';
+import * as authService from './authService';
 import { AuthContext } from './AuthContext';
 
 export function AuthProvider({ children }: { children: ReactNode }) {

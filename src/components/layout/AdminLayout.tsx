@@ -1,8 +1,8 @@
 import { Link, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
-import { Badge, Button } from '../common';
-import { MoonIcon, SunIcon } from '../icons';
+import { useAuth } from '@/features/auth/AuthContext';
+import { useTheme } from '@/features/theme/ThemeContext';
+import { Badge, Button } from '@/components/ui';
+import { MoonIcon, SunIcon } from '@/components/ui/icons';
 
 /**
  * Frame and gatekeeper for every admin screen. The login check lives here

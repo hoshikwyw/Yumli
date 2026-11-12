@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
-import { Container, Button } from '../components/common';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { Container, Button } from '@/components/ui';
 
 export default function NotFound() {
   const { t } = useTranslation();

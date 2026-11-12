@@ -1,9 +1,8 @@
 import { useState, type FormEvent } from 'react';
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { useDocumentTitle } from '../../hooks/useDocumentTitle';
-import { Card, Button, Input } from '../../components/common';
-import { ArrowLeftIcon } from '../../components/icons';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/features/auth/AuthContext';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { BackLink, Card, Button, Input } from '@/components/ui';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -75,13 +74,7 @@ export default function Login() {
         </form>
       </Card>
 
-      <Link
-        to="/"
-        className="mt-6 inline-flex items-center gap-1.5 min-h-11 text-base font-extrabold text-ink-soft no-underline hover:text-primary-ink"
-      >
-        <ArrowLeftIcon className="w-5 h-5" />
-        Back to Yumli
-      </Link>
+      <BackLink to="/" className="mt-6">Back to Yumli</BackLink>
     </div>
   );
 }

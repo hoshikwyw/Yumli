@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { Recipe } from '../types';
-import { useFavorites } from '../context/FavoritesContext';
-import { useCategoryLabel } from '../hooks/useCategoryLabel';
-import { coverImage } from '../utils/recipe';
-import { RecipeImage } from './common';
-import { ClockIcon, HeartIcon, PeopleIcon } from './icons';
+import type { Recipe } from '@/types';
+import { useFavorites } from '@/features/favorites/FavoritesContext';
+import { useCategoryLabel } from '@/features/recipes/hooks/useCategoryLabel';
+import { coverImage } from '@/features/recipes/utils';
+import { HeartIcon } from '@/components/ui/icons';
+import RecipeImage from './RecipeImage';
+import RecipeMeta from './RecipeMeta';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -49,20 +50,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
         {/* Short teaser: only where the card is wide enough for it to read well */}
         <p className="hidden sm:block mt-1 text-sm leading-relaxed text-ink-muted line-clamp-2">{recipe.description}</p>
 
-        <div className="mt-auto pt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold text-ink-soft">
-          {recipe.prep_time && (
-            <span className="inline-flex items-center gap-1">
-              <ClockIcon className="w-4 h-4" />
-              <span className="sr-only">{t('card.prepTime')}:</span>
-              {recipe.prep_time}
-            </span>
-          )}
-          <span className="inline-flex items-center gap-1">
-            <PeopleIcon className="w-4 h-4" />
-            <span className="sr-only">{t('card.serves')}:</span>
-            {recipe.servings}
-          </span>
-        </div>
+        <RecipeMeta recipe={recipe} className="mt-auto pt-2.5" />
       </div>
 
       <button

@@ -1,6 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import i18n from '../i18n';
-import { Button } from './common';
+import i18n from '@/i18n';
+import { Button } from '@/components/ui';
 
 interface Props {
   children: ReactNode;

@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useCategories } from '../../hooks/useRecipes';
-import { useDocumentTitle } from '../../hooks/useDocumentTitle';
-import { Button, Card, Container, Input, RecipeImage, Select, Skeleton, StateMessage, Textarea } from '../../components/common';
-import { fieldClasses } from '../../components/common/Input';
-import { ArrowLeftIcon, CloseIcon } from '../../components/icons';
-import * as recipeService from '../../services/recipeService';
-import type { RecipeInput } from '../../services/recipeService';
-import { getYouTubeId, youTubeEmbedUrl } from '../../utils/youtube';
-import { errorMessage } from '../../utils/errors';
+import { useEffect, useState, type FormEvent } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useCategories } from '@/features/recipes/hooks/useRecipes';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { BackLink, Button, Card, Container, Input, Select, Skeleton, StateMessage, Textarea } from '@/components/ui';
+import ListEditor from '@/features/admin/components/ListEditor';
+import PhotoPicker from '@/features/admin/components/PhotoPicker';
+import * as recipeService from '@/features/recipes/recipeService';
+import type { RecipeInput } from '@/features/recipes/recipeService';
+import { getYouTubeId, youTubeEmbedUrl } from '@/lib/youtube';
+import { errorMessage } from '@/lib/errors';
 
 const MAX_IMAGES = 3;
 
@@ -45,7 +45,6 @@ export default function RecipeForm() {
   const isEdit = Boolean(id);
   const navigate = useNavigate();
   const { categories } = useCategories();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   useDocumentTitle(isEdit ? 'Edit recipe' : 'New recipe');
 
   const [form, setForm] = useState<RecipeInput>(EMPTY_FORM);
@@ -108,10 +107,7 @@ export default function RecipeForm() {
     setErrors((prev) => ({ ...prev, images: undefined }));
   };
 
-  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []).slice(0, MAX_IMAGES - form.images.length);
-    if (files.length === 0) return;
-
+  const handleAddImages = async (files: File[]) => {
     setUploading(true);
     setFormError('');
     const uploaded: string[] = [];
@@ -123,7 +119,6 @@ export default function RecipeForm() {
     // Keep whatever did upload, even if a later file failed.
     if (uploaded.length > 0) setImages([...form.images, ...uploaded]);
     setUploading(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleRemoveImage = (index: number) => {
@@ -211,14 +206,12 @@ export default function RecipeForm() {
 
   return (
     <Container size="md" className="py-4 sm:py-8">
-      <Link
+      <BackLink
         to="/admin"
         onClick={(e) => { if (dirty && !confirm('Discard your changes?')) e.preventDefault(); }}
-        className="inline-flex items-center gap-1.5 min-h-11 text-base font-extrabold text-ink-soft no-underline hover:text-primary-ink"
       >
-        <ArrowLeftIcon className="w-5 h-5" />
         Dashboard
-      </Link>
+      </BackLink>
       <h1 className="text-title text-ink mt-1 mb-5">{isEdit ? 'Edit recipe' : 'New recipe'}</h1>
 
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
@@ -247,64 +240,14 @@ export default function RecipeForm() {
             The first photo is the cover. Photos are shrunk automatically before upload.
           </p>
 
-          <ul className="grid grid-cols-3 gap-2 sm:gap-3">
-            {form.images.map((url, i) => (
-              <li key={url} className={`relative aspect-square overflow-hidden border-[3px] ${i === 0 ? 'border-primary' : 'border-line-soft'}`}>
-                <RecipeImage src={url} alt={`Photo ${i + 1}`} />
-                {/* Always visible: a hover-only button cannot be found on a touch screen */}
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(i)}
-                  aria-label={`Remove photo ${i + 1}`}
-                  className="absolute top-0 right-0 flex items-center justify-center w-11 h-11"
-                >
-                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[#2B2B3D]/85 text-white">
-                    <CloseIcon className="w-4 h-4" strokeWidth={3} />
-                  </span>
-                </button>
-                {i === 0 ? (
-                  <span className="absolute bottom-1 left-1 bg-primary text-on-fill text-[0.8125rem] font-extrabold px-2 py-0.5">
-                    Cover
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => handleMakeCover(i)}
-                    className="absolute bottom-0 inset-x-0 min-h-9 bg-surface/95 text-ink text-[0.8125rem] font-extrabold"
-                  >
-                    Make cover
-                  </button>
-                )}
-              </li>
-            ))}
-
-            {form.images.length < MAX_IMAGES && (
-              <li className="aspect-square">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className={`w-full h-full flex flex-col items-center justify-center gap-1 border-2 border-dashed bg-surface-alt text-sm font-bold text-ink-soft hover:border-primary disabled:cursor-wait ${
-                    errors.images ? 'border-primary-ink' : 'border-line'
-                  }`}
-                >
-                  <span className="text-2xl leading-none" aria-hidden="true">{uploading ? '⏳' : '📷'}</span>
-                  {uploading ? 'Uploading…' : 'Add photo'}
-                </button>
-              </li>
-            )}
-          </ul>
-          {errors.images && (
-            <p role="alert" className="mt-2 text-sm font-semibold text-primary-ink">{errors.images}</p>
-          )}
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageUpload}
-            className="hidden"
+          <PhotoPicker
+            images={form.images}
+            max={MAX_IMAGES}
+            uploading={uploading}
+            error={errors.images}
+            onAdd={handleAddImages}
+            onRemove={handleRemoveImage}
+            onMakeCover={handleMakeCover}
           />
         </Card>
 
@@ -420,83 +363,5 @@ export default function RecipeForm() {
         </div>
       </form>
     </Container>
-  );
-}
-
-// ── Editable list (ingredients, steps) ──
-
-interface ListEditorProps {
-  title: string;
-  tone: 'pastel-pink' | 'pastel-mint';
-  items: string[];
-  onChange: (items: string[]) => void;
-  placeholder: (index: number) => string;
-  addLabel: string;
-  /** Use a taller text box per item: for steps, which are sentences. */
-  multiline?: boolean;
-}
-
-function ListEditor({ title, tone, items, onChange, placeholder, addLabel, multiline = false }: ListEditorProps) {
-  /** Row to put the cursor in when it appears: the one just added. */
-  const [focusIndex, setFocusIndex] = useState<number | null>(null);
-
-  const update = (index: number, value: string) => onChange(items.map((item, i) => (i === index ? value : item)));
-
-  const add = () => {
-    setFocusIndex(items.length);
-    onChange([...items, '']);
-  };
-
-  const remove = (index: number) => {
-    setFocusIndex(null);
-    const next = items.filter((_, i) => i !== index);
-    onChange(next.length ? next : ['']);
-  };
-
-  return (
-    <Card variant={tone} className="p-4 sm:p-6">
-      <h2 className="text-subheading text-ink mb-3">{title}</h2>
-      <ol className="space-y-2">
-        {items.map((item, i) => (
-          <li key={i} className="flex items-start gap-2">
-            <span aria-hidden="true" className="shrink-0 w-7 pt-3 text-right text-base font-extrabold text-ink-soft">
-              {i + 1}.
-            </span>
-            {multiline ? (
-              <textarea
-                value={item}
-                rows={2}
-                autoFocus={focusIndex === i}
-                aria-label={`${title} ${i + 1}`}
-                placeholder={placeholder(i)}
-                onChange={(e) => update(i, e.target.value)}
-                className={`${fieldClasses} flex-1 resize-y`}
-              />
-            ) : (
-              <input
-                value={item}
-                autoFocus={focusIndex === i}
-                aria-label={`${title} ${i + 1}`}
-                placeholder={placeholder(i)}
-                enterKeyHint="next"
-                onChange={(e) => update(i, e.target.value)}
-                // Enter moves on to a new row instead of submitting the whole form by accident.
-                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } }}
-                className={`${fieldClasses} flex-1`}
-              />
-            )}
-            <button
-              type="button"
-              onClick={() => remove(i)}
-              aria-label={`Remove ${title.toLowerCase()} ${i + 1}`}
-              className="shrink-0 flex items-center justify-center w-11 h-12 text-ink-soft hover:text-primary-ink"
-            >
-              <CloseIcon className="w-5 h-5" />
-            </button>
-          </li>
-        ))}
-      </ol>
-      <Button variant="outline" size="sm" onClick={add} className="mt-3">{addLabel}</Button>
-    </Card>
   );
 }

@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../context/ThemeContext';
-import { GlobeIcon, MoonIcon, SunIcon } from '../icons';
+import { useTheme } from '@/features/theme/ThemeContext';
+import { GlobeIcon, MoonIcon, SunIcon } from '@/components/ui/icons';
 import { pageNavItems } from './navItems';
 
 /* Square 44px control: big enough to hit first time on a phone. */

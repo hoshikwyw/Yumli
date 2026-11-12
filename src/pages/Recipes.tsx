@@ -1,15 +1,15 @@
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useRecipes } from '../hooks/useRecipes';
-import { useCategoryLabel } from '../hooks/useCategoryLabel';
-import { useFavorites } from '../context/FavoritesContext';
-import { PageHeader, Container, Button, Chip, StateMessage } from '../components/common';
-import { CloseIcon, HeartIcon, SearchIcon } from '../components/icons';
-import RecipeGrid from '../components/RecipeGrid';
-import { fieldClasses } from '../components/common/Input';
-import { categoryEmoji, isQuick } from '../utils/recipe';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
-import type { Recipe } from '../types';
+import { useRecipes } from '@/features/recipes/hooks/useRecipes';
+import { useCategoryLabel } from '@/features/recipes/hooks/useCategoryLabel';
+import { useFavorites } from '@/features/favorites/FavoritesContext';
+import { PageHeader, Container, Button, Chip, StateMessage, fieldClasses } from '@/components/ui';
+import LoadError from '@/features/recipes/components/LoadError';
+import { CloseIcon, HeartIcon, SearchIcon } from '@/components/ui/icons';
+import RecipeGrid from '@/features/recipes/components/RecipeGrid';
+import { categoryEmoji, isQuick } from '@/features/recipes/utils';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import type { Recipe } from '@/types';
 
 /** Everything a visitor might type to find a recipe, in one lowercase string. */
 const searchText = (recipe: Recipe) =>
@@ -132,12 +132,7 @@ export default function Recipes() {
       <section className="py-6 sm:py-10">
         <Container>
           {error ? (
-            <StateMessage
-              alert
-              emoji="😕"
-              title={t('common.loadError')}
-              action={<Button variant="primary" onClick={reload}>{t('common.retry')}</Button>}
-            />
+            <LoadError onRetry={reload} />
           ) : loading ? (
             <RecipeGrid recipes={[]} loading />
           ) : nothingSaved ? (

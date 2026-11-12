@@ -99,27 +99,29 @@ Deployed on Vercel. Set the variables from `.env.example` (all but the
 ```
 api/              # Vercel functions: recipes, categories, images, auth
   _lib/           # service-account client, session cookie, validation
-src/
-  components/
-    common/       # Button, Card, Badge, Input, Select, Chip, RecipeImage, etc.
-    layout/       # Header, BottomNav, Footer, PublicLayout, AdminLayout
-    recipe/       # ImageGallery, ingredient and step checklists
-    HeroSection.tsx, FeaturedRecipe.tsx, RecipeCard.tsx, RecipeGrid.tsx
-    icons.tsx, ErrorBoundary.tsx
-  context/        # Theme, Favorites, Auth providers
-  hooks/          # useRecipes, useCategoryLabel, useDocumentTitle
-  locales/        # en + mm translations
-  pages/
-    Home.tsx
-    Recipes.tsx
-    RecipeDetail.tsx
-    About.tsx
-    NotFound.tsx
-    admin/        # Login, Dashboard, RecipeForm
-  services/       # recipeService, authService (calls to /api)
-  index.css       # Design tokens (colours, type scale, pixel boxes), light + dark
-  types/          # Recipe, Category
-  utils/          # recipe helpers, YouTube links, error messages
+src/                # imports use the "@/" alias, e.g. "@/components/ui"
+  main.tsx, App.tsx # entry point; providers and routes
+  pages/            # one file per route: Home, Recipes, RecipeDetail, About, NotFound
+    admin/          # Login, Dashboard, RecipeForm
+  features/         # code that belongs to one area of the app
+    recipes/        # recipeService (calls /api), hooks, utils, and components:
+                    #   RecipeCard, RecipeGrid, RecipeImage, RecipeMeta, FeaturedRecipe,
+                    #   ImageGallery, Checklists, LoadError
+    home/           # HeroSection, CategoryPicks
+    admin/          # RecipeList, CategoryManager, ListEditor, PhotoPicker
+    auth/           # AuthContext (useAuth), AuthProvider, authService
+    favorites/      # FavoritesContext (useFavorites), FavoritesProvider
+    theme/          # ThemeContext (useTheme), ThemeProvider
+  components/       # shared by every feature
+    ui/             # Button, Card, Badge, Chip, Input, Select, Skeleton, StateMessage,
+                    #   PageHeader, Container, BackLink, icons
+    layout/         # Header, BottomNav, Footer, PublicLayout, AdminLayout
+    ErrorBoundary.tsx
+  hooks/            # useDocumentTitle
+  lib/              # small helpers with no app knowledge: errors, youtube
+  i18n/             # setup + locales/ (en, mm)
+  styles/index.css  # design tokens (colours, type scale, pixel boxes), light + dark
+  types/            # Recipe, Category
 scripts/
   migrate-from-old-project.mjs   # one-time data move
 supabase/

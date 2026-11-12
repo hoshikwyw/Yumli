@@ -1,17 +1,18 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useRecipeById, useRecipes } from '../hooks/useRecipes';
-import { useCategoryLabel } from '../hooks/useCategoryLabel';
-import { useDocumentTitle } from '../hooks/useDocumentTitle';
-import { useFavorites } from '../context/FavoritesContext';
-import { Badge, Button, Card, Container, Skeleton, StateMessage } from '../components/common';
-import { ArrowLeftIcon, HeartIcon, ShareIcon } from '../components/icons';
-import ImageGallery from '../components/recipe/ImageGallery';
-import { IngredientChecklist, StepList } from '../components/recipe/Checklists';
-import RecipeGrid from '../components/RecipeGrid';
-import { getYouTubeId, youTubeEmbedUrl } from '../utils/youtube';
-import type { Recipe } from '../types';
+import { useRecipeById, useRecipes } from '@/features/recipes/hooks/useRecipes';
+import { useCategoryLabel } from '@/features/recipes/hooks/useCategoryLabel';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useFavorites } from '@/features/favorites/FavoritesContext';
+import { BackLink, Badge, Button, Card, Container, Skeleton, StateMessage } from '@/components/ui';
+import { HeartIcon, ShareIcon } from '@/components/ui/icons';
+import LoadError from '@/features/recipes/components/LoadError';
+import ImageGallery from '@/features/recipes/components/ImageGallery';
+import { IngredientChecklist, StepList } from '@/features/recipes/components/Checklists';
+import RecipeGrid from '@/features/recipes/components/RecipeGrid';
+import { getYouTubeId, youTubeEmbedUrl } from '@/lib/youtube';
+import type { Recipe } from '@/types';
 
 const DIFFICULTY_BADGE = { Easy: 'accent', Medium: 'warm', Hard: 'primary' } as const;
 
@@ -27,12 +28,7 @@ export default function RecipeDetail() {
   if (error) {
     return (
       <Container>
-        <StateMessage
-          alert
-          emoji="😕"
-          title={t('common.loadError')}
-          action={<Button variant="primary" onClick={reload}>{t('common.retry')}</Button>}
-        />
+        <LoadError onRetry={reload} />
       </Container>
     );
   }
@@ -89,13 +85,7 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
   return (
     <div className="bg-bg">
       <Container className="py-4 sm:py-8">
-        <Link
-          to="/recipes"
-          className="inline-flex items-center gap-1.5 min-h-11 text-base font-extrabold text-ink-soft no-underline hover:text-primary-ink"
-        >
-          <ArrowLeftIcon className="w-5 h-5" />
-          {t('recipeDetail.back')}
-        </Link>
+        <BackLink to="/recipes">{t('recipeDetail.back')}</BackLink>
 
         <article className="mt-2 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
           {/* Photos: stay in view on wide screens while the method scrolls */}

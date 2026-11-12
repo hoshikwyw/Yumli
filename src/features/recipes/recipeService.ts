@@ -1,4 +1,4 @@
-import type { Recipe, Category } from '../types';
+import type { Recipe, Category } from '@/types';
 
 /**
  * All data goes through Yumli's own API (`/api/*`, see the `api/` folder).

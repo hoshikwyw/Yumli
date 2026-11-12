@@ -1,6 +1,6 @@
-import type { Recipe } from '../types';
+import type { Recipe } from '@/types';
 import RecipeCard from './RecipeCard';
-import { RecipeCardSkeleton } from './common';
+import { RecipeCardSkeleton } from '@/components/ui';
 
 interface RecipeGridProps {
   recipes: Recipe[];

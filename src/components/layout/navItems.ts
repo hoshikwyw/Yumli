@@ -1,5 +1,5 @@
 import type { ComponentType, SVGProps } from 'react';
-import { BookIcon, HeartIcon, HomeIcon, InfoIcon } from '../icons';
+import { BookIcon, HeartIcon, HomeIcon, InfoIcon } from '@/components/ui/icons';
 
 export interface NavItem {
   /** Translation key for the label. */

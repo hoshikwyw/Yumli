@@ -1,4 +1,4 @@
-import type { Recipe } from '../types';
+import type { Recipe } from '@/types';
 
 /** Recipes at or under this many minutes of prep count as "quick". */
 export const QUICK_MINUTES = 10;

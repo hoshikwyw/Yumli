@@ -1,23 +1,23 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from './context/ThemeProvider';
-import { FavoritesProvider } from './context/FavoritesProvider';
-import { AuthProvider } from './context/AuthProvider';
-import ErrorBoundary from './components/ErrorBoundary';
-import PublicLayout from './components/layout/PublicLayout';
-import ScrollToTop from './components/layout/ScrollToTop';
-import Home from './pages/Home';
-import Recipes from './pages/Recipes';
-import RecipeDetail from './pages/RecipeDetail';
-import About from './pages/About';
-import NotFound from './pages/NotFound';
+import { ThemeProvider } from '@/features/theme/ThemeProvider';
+import { FavoritesProvider } from '@/features/favorites/FavoritesProvider';
+import { AuthProvider } from '@/features/auth/AuthProvider';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import PublicLayout from '@/components/layout/PublicLayout';
+import ScrollToTop from '@/components/layout/ScrollToTop';
+import Home from '@/pages/Home';
+import Recipes from '@/pages/Recipes';
+import RecipeDetail from '@/pages/RecipeDetail';
+import About from '@/pages/About';
+import NotFound from '@/pages/NotFound';
 
 // The admin screens are downloaded only when someone opens them, so visitors
 // who just want a recipe never pay for the dashboard and the recipe editor.
-const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
-const Login = lazy(() => import('./pages/admin/Login'));
-const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
-const RecipeForm = lazy(() => import('./pages/admin/RecipeForm'));
+const AdminLayout = lazy(() => import('@/components/layout/AdminLayout'));
+const Login = lazy(() => import('@/pages/admin/Login'));
+const Dashboard = lazy(() => import('@/pages/admin/Dashboard'));
+const RecipeForm = lazy(() => import('@/pages/admin/RecipeForm'));
 
 function App() {
   return (

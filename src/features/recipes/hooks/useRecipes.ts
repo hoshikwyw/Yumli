@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { Recipe, Category } from '../types';
-import * as recipeService from '../services/recipeService';
+import type { Recipe, Category } from '@/types';
+import * as recipeService from '@/features/recipes/recipeService';
 
 interface AsyncState<T> {
   data: T;

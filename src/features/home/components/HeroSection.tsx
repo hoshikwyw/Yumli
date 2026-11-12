@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Button, Container } from './common';
-import { ArrowRightIcon } from './icons';
+import { Button, Container } from '@/components/ui';
+import { ArrowRightIcon } from '@/components/ui/icons';
 
 /* Decorative food pictures: a tidy row of three on phones, an overlapping collage from tablet up. */
 const tiles = [
