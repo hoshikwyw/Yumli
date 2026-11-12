@@ -5,6 +5,7 @@ import RecipeList from '@/features/admin/components/RecipeList';
 import CategoryManager from '@/features/admin/components/CategoryManager';
 import * as recipeService from '@/features/recipes/recipeService';
 import { errorMessage } from '@/lib/errors';
+import { notify } from '@/lib/notify';
 import type { Recipe, Category } from '@/types';
 
 type Tab = 'recipes' | 'categories';
@@ -19,8 +20,6 @@ export default function Dashboard() {
   const [loadError, setLoadError] = useState('');
   /** Id of the recipe or category being deleted right now. */
   const [deleting, setDeleting] = useState<string | null>(null);
-  /** Problem with the last action (delete, add, rename), shown above the lists. */
-  const [actionError, setActionError] = useState('');
 
   /** Bumped to run the load once more: by "Try again", and after a category changes. */
   const [attempt, setAttempt] = useState(0);
@@ -53,12 +52,12 @@ export default function Dashboard() {
   const handleDeleteRecipe = async (recipe: Recipe) => {
     if (!confirm(`Delete "${recipe.title}"? This cannot be undone.`)) return;
     setDeleting(recipe.id);
-    setActionError('');
     try {
       await recipeService.deleteRecipe(recipe.id);
       setRecipes((prev) => prev.filter((r) => r.id !== recipe.id));
+      notify.success('Recipe deleted', { description: recipe.title });
     } catch (error) {
-      setActionError(`Could not delete "${recipe.title}": ${errorMessage(error)}`);
+      notify.error('Could not delete the recipe', { description: errorMessage(error) });
     }
     setDeleting(null);
   };
@@ -85,19 +84,6 @@ export default function Dashboard() {
         <Chip selected={tab === 'categories'} onClick={() => setTab('categories')}>Categories</Chip>
       </div>
 
-      {actionError && (
-        <div role="alert" className="mt-4 flex items-start justify-between gap-3 bg-primary-soft border-2 border-primary px-4 py-2 text-base font-semibold text-ink">
-          <span className="py-1.5">{actionError}</span>
-          <button
-            type="button"
-            onClick={() => setActionError('')}
-            className="shrink-0 min-h-11 px-2 font-extrabold underline underline-offset-4"
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
-
       <div className="mt-5">
         {loadError ? (
           <StateMessage
@@ -117,7 +103,6 @@ export default function Dashboard() {
             categories={categories}
             recipes={recipes}
             onChanged={reload}
-            onError={setActionError}
           />
         )}
       </div>

@@ -3,6 +3,7 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { useTheme } from '@/features/theme/ThemeContext';
 import { Badge, Button, Logo } from '@/components/ui';
 import { MoonIcon, SunIcon } from '@/components/ui/icons';
+import { notify } from '@/lib/notify';
 
 /**
  * Frame and gatekeeper for every admin screen. The login check lives here
@@ -29,6 +30,7 @@ export default function AdminLayout() {
 
   const handleLogout = async () => {
     await logout();
+    notify.info('Logged out');
     navigate('/');
   };
 

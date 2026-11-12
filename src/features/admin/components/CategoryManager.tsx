@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Card, Input, StateMessage } from '@/components/ui';
 import * as recipeService from '@/features/recipes/recipeService';
 import { errorMessage } from '@/lib/errors';
+import { notify } from '@/lib/notify';
 import type { Category, Recipe } from '@/types';
 
 interface CategoryManagerProps {
@@ -9,7 +10,6 @@ interface CategoryManagerProps {
   recipes: Recipe[];
   /** Called after a category was added, renamed or deleted, so the lists can be reloaded. */
   onChanged: () => void;
-  onError: (message: string) => void;
 }
 
 /** The server answers 409 "That name is already used" for a duplicate: say it in plainer words. */
@@ -19,7 +19,7 @@ const categoryError = (error: unknown) => {
 };
 
 /** Add, rename and delete categories. */
-export default function CategoryManager({ categories, recipes, onChanged, onError }: CategoryManagerProps) {
+export default function CategoryManager({ categories, recipes, onChanged }: CategoryManagerProps) {
   const [newName, setNewName] = useState('');
   const [addError, setAddError] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -38,6 +38,7 @@ export default function CategoryManager({ categories, recipes, onChanged, onErro
       await recipeService.createCategory(name);
       setNewName('');
       onChanged();
+      notify.success('Category added', { description: name });
     } catch (error) {
       setAddError(categoryError(error));
     }
@@ -59,6 +60,7 @@ export default function CategoryManager({ categories, recipes, onChanged, onErro
       await recipeService.updateCategory(id, name);
       setEditingId(null);
       onChanged();
+      notify.success('Category renamed', { description: name });
     } catch (error) {
       setEditError(categoryError(error));
     }
@@ -72,12 +74,12 @@ export default function CategoryManager({ categories, recipes, onChanged, onErro
       : `Delete category "${category.name}"?`;
     if (!confirm(question)) return;
     setBusy(true);
-    onError('');
     try {
       await recipeService.deleteCategory(category.id);
       onChanged();
+      notify.success('Category deleted', { description: category.name });
     } catch (error) {
-      onError(`Could not delete "${category.name}": ${errorMessage(error)}`);
+      notify.error('Could not delete the category', { description: errorMessage(error) });
     }
     setBusy(false);
   };

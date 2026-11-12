@@ -12,3 +12,4 @@ export { default as BackLink } from './BackLink';
 export { default as Logo } from './Logo';
 export { default as PixelArt } from './pixel-art/PixelArt';
 export type { SpriteName } from './pixel-art/sprites';
+export { default as Toaster } from './Toaster';

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { textLang } from '@/lib/lang';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +5,8 @@ import { useRecipeById, useRecipes } from '@/features/recipes/hooks/useRecipes';
 import { useCategoryLabel } from '@/features/recipes/hooks/useCategoryLabel';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useFavorites } from '@/features/favorites/FavoritesContext';
+import { useSaveRecipe } from '@/features/favorites/useSaveRecipe';
+import { notify } from '@/lib/notify';
 import { BackLink, Badge, Button, Card, Container, Skeleton, StateMessage } from '@/components/ui';
 import { HeartIcon, ShareIcon } from '@/components/ui/icons';
 import LoadError from '@/features/recipes/components/LoadError';
@@ -52,10 +53,10 @@ export default function RecipeDetail() {
 
 function RecipeView({ recipe }: { recipe: Recipe }) {
   const { recipes } = useRecipes();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite } = useFavorites();
+  const saveRecipe = useSaveRecipe();
   const { t } = useTranslation();
   const categoryLabel = useCategoryLabel();
-  const [copied, setCopied] = useState(false);
 
   const fav = isFavorite(recipe.id);
   const images = recipe.images?.length ? recipe.images : recipe.image ? [recipe.image] : [];
@@ -71,8 +72,7 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
         await navigator.share({ title: recipe.title, url });
       } else {
         await navigator.clipboard.writeText(url);
-        setCopied(true);
-        window.setTimeout(() => setCopied(false), 2500);
+        notify.success(t('recipeDetail.linkCopied'));
       }
     } catch { /* the visitor closed the share sheet, or the browser refused: nothing to do */ }
   };
@@ -112,14 +112,14 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
                   variant={fav ? 'primary' : 'outline'}
                   size="sm"
                   aria-pressed={fav}
-                  onClick={() => toggleFavorite(recipe.id)}
+                  onClick={() => saveRecipe(recipe)}
                 >
                   <HeartIcon className="w-5 h-5" fill={fav ? 'currentColor' : 'none'} />
                   {t(fav ? 'recipes.saved' : 'recipeDetail.save')}
                 </Button>
                 <Button variant="outline" size="sm" onClick={share}>
                   <ShareIcon className="w-5 h-5" />
-                  <span aria-live="polite">{copied ? t('recipeDetail.linkCopied') : t('recipeDetail.share')}</span>
+                  {t('recipeDetail.share')}
                 </Button>
               </div>
             </header>

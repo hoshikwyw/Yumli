@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/features/theme/ThemeProvider';
 import { FavoritesProvider } from '@/features/favorites/FavoritesProvider';
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { Toaster } from '@/components/ui';
 import PublicLayout from '@/components/layout/PublicLayout';
 import ScrollToTop from '@/components/layout/ScrollToTop';
 import Home from '@/pages/Home';
@@ -23,6 +24,7 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
+        <Toaster />
         <FavoritesProvider>
           <AuthProvider>
             <Router>

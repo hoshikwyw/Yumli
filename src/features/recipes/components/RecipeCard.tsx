@@ -3,6 +3,7 @@ import { textLang } from '@/lib/lang';
 import { useTranslation } from 'react-i18next';
 import type { Recipe } from '@/types';
 import { useFavorites } from '@/features/favorites/FavoritesContext';
+import { useSaveRecipe } from '@/features/favorites/useSaveRecipe';
 import { useCategoryLabel } from '@/features/recipes/hooks/useCategoryLabel';
 import { coverImage } from '@/features/recipes/utils';
 import { HeartIcon } from '@/components/ui/icons';
@@ -19,7 +20,8 @@ interface RecipeCardProps {
  * so there is no button nested inside a link.
  */
 export default function RecipeCard({ recipe }: RecipeCardProps) {
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite } = useFavorites();
+  const saveRecipe = useSaveRecipe();
   const { t } = useTranslation();
   const categoryLabel = useCategoryLabel();
   const fav = isFavorite(recipe.id);
@@ -58,7 +60,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
 
       <button
         type="button"
-        onClick={() => toggleFavorite(recipe.id)}
+        onClick={() => saveRecipe(recipe)}
         aria-pressed={fav}
         aria-label={t(fav ? 'card.unsave' : 'card.save', { title: recipe.title })}
         className={`absolute top-2 right-2 z-10 flex items-center justify-center w-11 h-11 rounded-full border-2 heart-pop ${

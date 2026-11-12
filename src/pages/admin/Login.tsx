@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { notify } from '@/lib/notify';
 import { BackLink, Card, Button, Input, PixelArt } from '@/components/ui';
 
 export default function Login() {
@@ -27,7 +28,10 @@ export default function Login() {
     try {
       const failure = await login(username, password);
       if (failure) setError(failure);
-      else navigate(destination, { replace: true });
+      else {
+        notify.success('Welcome back');
+        navigate(destination, { replace: true });
+      }
     } catch {
       setError('Could not reach the server. Try again.');
     }

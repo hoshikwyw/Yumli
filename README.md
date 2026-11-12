@@ -21,6 +21,7 @@ Your cozy kitchen companion. A cute, pixel-art themed recipe app built for peopl
 - **Database:** Supabase (PostgreSQL, Storage, Row Level Security)
 - **Routing:** React Router v7
 - **i18n:** react-i18next
+- **Notifications:** [Ding](https://ding.yusufcengiz.dev) toasts, used through `src/lib/notify.ts`
 
 ## How data flows
 

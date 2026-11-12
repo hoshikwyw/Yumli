@@ -9,6 +9,7 @@ import * as recipeService from '@/features/recipes/recipeService';
 import type { RecipeInput } from '@/features/recipes/recipeService';
 import { getYouTubeId, youTubeEmbedUrl } from '@/lib/youtube';
 import { errorMessage } from '@/lib/errors';
+import { notify } from '@/lib/notify';
 
 const MAX_IMAGES = 3;
 
@@ -122,12 +123,23 @@ export default function RecipeForm() {
 
   const handleAddImages = async (files: File[]) => {
     setUploading(true);
-    setFormError('');
     const uploaded: string[] = [];
+    const label = (done: number) => (files.length === 1 ? 'Uploading photo…' : `Uploading photo ${done + 1} of ${files.length}…`);
+    // One notification follows the whole upload: a progress bar, then the result.
+    const toastId = notify.loading(label(0), { progress: 0 });
     try {
-      for (const file of files) uploaded.push(await recipeService.uploadImage(file));
+      for (const [index, file] of files.entries()) {
+        notify.update(toastId, { title: label(index), progress: index / files.length });
+        uploaded.push(await recipeService.uploadImage(file));
+      }
+      notify.update(toastId, {
+        type: 'success',
+        title: files.length === 1 ? 'Photo added' : `${files.length} photos added`,
+        progress: null,
+        duration: 4000,
+      });
     } catch (error) {
-      setFormError(`Upload failed: ${errorMessage(error)}`);
+      notify.update(toastId, { type: 'error', title: 'Upload failed', description: errorMessage(error), progress: null });
     }
     // Keep whatever did upload, even if a later file failed.
     if (uploaded.length > 0) {
@@ -195,6 +207,7 @@ export default function RecipeForm() {
           .filter((url) => !clean.images.includes(url))
           .map((url) => recipeService.deleteImage(url).catch(() => {})),
       );
+      notify.success(id ? 'Changes saved' : 'Recipe created', { description: clean.title });
       navigate('/admin');
     } catch (error) {
       setFormError(errorMessage(error));

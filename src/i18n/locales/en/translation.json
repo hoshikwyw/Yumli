@@ -122,5 +122,12 @@
     "Easy": "Easy",
     "Medium": "Medium",
     "Hard": "Hard"
+  },
+  "toast": {
+    "region": "Notifications",
+    "dismiss": "Dismiss notification",
+    "saved": "Saved to your recipes",
+    "removed": "Removed from saved",
+    "undo": "Undo"
   }
 }

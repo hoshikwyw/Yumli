@@ -387,3 +387,18 @@
 :lang(my) :is(p, li) {
   line-height: 1.85;
 }
+
+/* Notifications (components/ui/Toaster.tsx). The toast is drawn in the
+   opposite tone to the page so it stands out: dark on the light theme, light
+   on the dark theme. The class is doubled so these values win over the
+   library's own, whichever stylesheet loads first. */
+.tst-viewport.tst-viewport {
+  --tst-radius: 8px;
+  --tst-bg: light-dark(#2B2B3D, #F1EEE9);
+  --tst-fg: light-dark(#FFFFFF, #1A1A2E);
+  --tst-success: light-dark(#7ECFB3, #1F7A5C);
+  --tst-error: light-dark(#FF9B9B, #C2374A);
+  --tst-warning: light-dark(#FFD98E, #8A5A00);
+  --tst-info: light-dark(#8ECAE6, #2A6F97);
+  font-family: var(--font-body);
+}
