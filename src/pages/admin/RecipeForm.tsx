@@ -1,179 +1,173 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useCategories } from '../../hooks/useRecipes';
-import { fonts } from '../../themes/font';
-import { Container, Card, Button, Input, Textarea, Select } from '../../components/common';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import { Button, Card, Container, Input, RecipeImage, Select, Skeleton, StateMessage, Textarea } from '../../components/common';
+import { fieldClasses } from '../../components/common/Input';
+import { ArrowLeftIcon, CloseIcon } from '../../components/icons';
 import * as recipeService from '../../services/recipeService';
 import type { RecipeInput } from '../../services/recipeService';
 import { getYouTubeId, youTubeEmbedUrl } from '../../utils/youtube';
+import { errorMessage } from '../../utils/errors';
 
 const MAX_IMAGES = 3;
+
+const EMPTY_FORM: RecipeInput = {
+  title: '',
+  description: '',
+  image: '',
+  images: [],
+  prep_time: '',
+  cook_time: '',
+  servings: 1,
+  difficulty: 'Easy',
+  ingredients: [''],
+  instructions: [''],
+  category_id: '',
+  is_featured: false,
+  youtube_link: '',
+};
+
+type FieldErrors = Partial<Record<'title' | 'description' | 'category_id' | 'images', string>>;
+
+/** What must be filled in before a recipe can be saved, with the message for each gap. */
+function validate(form: RecipeInput): FieldErrors {
+  const errors: FieldErrors = {};
+  if (!form.title.trim()) errors.title = 'Give the recipe a name.';
+  if (!form.description.trim()) errors.description = 'Add a short description.';
+  if (!form.category_id) errors.category_id = 'Choose a category.';
+  if (form.images.length === 0) errors.images = 'Add at least one photo.';
+  return errors;
+}
 
 export default function RecipeForm() {
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
-  const { isLoggedIn, checking } = useAuth();
   const navigate = useNavigate();
-  const { colors } = useTheme();
   const { categories } = useCategories();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  useDocumentTitle(isEdit ? 'Edit recipe' : 'New recipe');
 
+  const [form, setForm] = useState<RecipeInput>(EMPTY_FORM);
+  /** Edit mode only: 'loading' until the recipe arrives, 'missing' if it does not exist. */
+  const [loadState, setLoadState] = useState<'ready' | 'loading' | 'missing' | 'failed'>(isEdit ? 'loading' : 'ready');
+  const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(isEdit);
-  const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [formError, setFormError] = useState('');
   const [removedImages, setRemovedImages] = useState<string[]>([]);
 
-  const [form, setForm] = useState<RecipeInput>({
-    title: '',
-    description: '',
-    image: '',
-    images: [],
-    prep_time: '',
-    cook_time: '',
-    servings: 1,
-    difficulty: 'Easy',
-    ingredients: [''],
-    instructions: [''],
-    category_id: '',
-    is_featured: false,
-    youtube_link: '',
-  });
-
   useEffect(() => {
-    if (checking) return;
-    if (!isLoggedIn) { navigate('/admin/login'); return; }
-    if (isEdit && id) {
-      recipeService.getRawRecipeById(id).then((data) => {
-        if (data) {
-          setForm({
-            title: data.title,
-            description: data.description,
-            image: data.image ?? '',
-            images: data.images ?? [],
-            prep_time: data.prep_time,
-            cook_time: data.cook_time,
-            servings: data.servings,
-            difficulty: data.difficulty,
-            ingredients: data.ingredients?.length ? data.ingredients : [''],
-            instructions: data.instructions?.length ? data.instructions : [''],
-            category_id: data.category_id ?? '',
-            is_featured: data.is_featured ?? false,
-            youtube_link: data.youtube_link ?? '',
-          });
-        }
-        setLoading(false);
-      });
-    }
-  }, [checking, isLoggedIn, isEdit, id, navigate]);
+    if (!id) return;
+    let stale = false;
+    recipeService.getRawRecipeById(id)
+      .then((data) => {
+        if (stale) return;
+        if (!data) { setLoadState('missing'); return; }
+        setForm({
+          title: data.title,
+          description: data.description,
+          image: data.image ?? '',
+          images: data.images ?? [],
+          prep_time: data.prep_time,
+          cook_time: data.cook_time,
+          servings: data.servings,
+          difficulty: data.difficulty,
+          ingredients: data.ingredients?.length ? data.ingredients : [''],
+          instructions: data.instructions?.length ? data.instructions : [''],
+          category_id: data.category_id ?? '',
+          is_featured: data.is_featured ?? false,
+          youtube_link: data.youtube_link ?? '',
+        });
+        setLoadState('ready');
+      })
+      .catch(() => { if (!stale) setLoadState('failed'); });
+    return () => { stale = true; };
+  }, [id]);
+
+  // Closing the tab or reloading with unsaved work asks first.
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [dirty]);
 
   const updateField = <K extends keyof RecipeInput>(key: K, value: RecipeInput[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+    setDirty(true);
+    // The field is being fixed: stop showing its error.
+    if (key in errors) setErrors((prev) => ({ ...prev, [key]: undefined }));
   };
 
-  const updateListItem = (key: 'ingredients' | 'instructions', index: number, value: string) => {
-    setForm((prev) => {
-      const list = [...prev[key]];
-      list[index] = value;
-      return { ...prev, [key]: list };
-    });
+  /** The first image is the cover; `image` mirrors it for older code that reads a single picture. */
+  const setImages = (images: string[]) => {
+    setForm((prev) => ({ ...prev, images, image: images[0] ?? '' }));
+    setDirty(true);
+    setErrors((prev) => ({ ...prev, images: undefined }));
   };
 
-  const addListItem = (key: 'ingredients' | 'instructions') => {
-    setForm((prev) => ({ ...prev, [key]: [...prev[key], ''] }));
-  };
+  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []).slice(0, MAX_IMAGES - form.images.length);
+    if (files.length === 0) return;
 
-  const removeListItem = (key: 'ingredients' | 'instructions', index: number) => {
-    setForm((prev) => {
-      const list = prev[key].filter((_, i) => i !== index);
-      return { ...prev, [key]: list.length ? list : [''] };
-    });
-  };
-
-  // ── Image upload ──
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const remaining = MAX_IMAGES - form.images.length;
-    if (remaining <= 0) {
-      setError(`Maximum ${MAX_IMAGES} images allowed`);
-      return;
-    }
-
-    const toUpload = Array.from(files).slice(0, remaining);
     setUploading(true);
-    setError('');
-
+    setFormError('');
+    const uploaded: string[] = [];
     try {
-      const urls: string[] = [];
-      for (const file of toUpload) {
-        const url = await recipeService.uploadImage(file);
-        urls.push(url);
-      }
-
-      setForm((prev) => {
-        const newImages = [...prev.images, ...urls];
-        return {
-          ...prev,
-          images: newImages,
-          image: newImages[0] ?? prev.image, // first image is cover
-        };
-      });
-    } catch (err: any) {
-      setError(`Upload failed: ${err.message}`);
+      for (const file of files) uploaded.push(await recipeService.uploadImage(file));
+    } catch (error) {
+      setFormError(`Upload failed: ${errorMessage(error)}`);
     }
-
+    // Keep whatever did upload, even if a later file failed.
+    if (uploaded.length > 0) setImages([...form.images, ...uploaded]);
     setUploading(false);
-    // Reset file input
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleRemoveImage = (index: number) => {
-    const url = form.images[index];
-    setForm((prev) => {
-      const newImages = prev.images.filter((_, i) => i !== index);
-      return {
-        ...prev,
-        images: newImages,
-        image: newImages[0] ?? '',
-      };
-    });
     // Deleted from storage only once the recipe is saved: until then the
     // saved recipe still shows it, and Cancel must leave it intact.
-    setRemovedImages((prev) => [...prev, url]);
+    setRemovedImages((prev) => [...prev, form.images[index]]);
+    setImages(form.images.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+  const handleMakeCover = (index: number) => {
+    setImages([form.images[index], ...form.images.filter((_, i) => i !== index)]);
+  };
 
-    if (!form.title || !form.description || !form.category_id) {
-      setError('Please fill in title, description, and category');
-      return;
-    }
-    if (form.images.length === 0) {
-      setError('Please upload at least one image');
+  const handleCancel = () => {
+    if (dirty && !confirm('Discard your changes?')) return;
+    navigate('/admin');
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (saving) return;
+    setFormError('');
+
+    const found = validate(form);
+    setErrors(found);
+    if (Object.keys(found).length > 0) {
+      setFormError('Some things are missing. Check the fields marked above.');
       return;
     }
 
     const clean: RecipeInput = {
       ...form,
+      title: form.title.trim(),
+      description: form.description.trim(),
       image: form.images[0] ?? '',
       youtube_link: form.youtube_link?.trim() || null,
-      ingredients: form.ingredients.filter((s) => s.trim()),
-      instructions: form.instructions.filter((s) => s.trim()),
+      ingredients: form.ingredients.map((s) => s.trim()).filter(Boolean),
+      instructions: form.instructions.map((s) => s.trim()).filter(Boolean),
     };
 
     setSaving(true);
     try {
-      if (isEdit && id) {
-        await recipeService.updateRecipe(id, clean);
-      } else {
-        await recipeService.createRecipe(clean);
-      }
+      if (id) await recipeService.updateRecipe(id, clean);
+      else await recipeService.createRecipe(clean);
       // Now that the recipe no longer uses them, clear removed images out of
       // storage. Best effort: a leftover file costs space, not correctness.
       await Promise.all(
@@ -182,303 +176,327 @@ export default function RecipeForm() {
           .map((url) => recipeService.deleteImage(url).catch(() => {})),
       );
       navigate('/admin');
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+    } catch (error) {
+      setFormError(errorMessage(error));
+      setSaving(false);
     }
-    setSaving(false);
   };
 
-  if (loading) {
+  if (loadState === 'loading') {
     return (
-      <div style={{ backgroundColor: colors.bgPrimary }} className="min-h-screen flex items-center justify-center">
-        <p style={{ ...fonts.body, color: colors.textMuted }}>Loading...</p>
-      </div>
+      <Container size="md" className="py-6 sm:py-10">
+        <div aria-busy="true" className="space-y-5">
+          <Skeleton height="40px" width="50%" />
+          <Skeleton height="220px" className="!rounded-none" />
+          <Skeleton height="180px" className="!rounded-none" />
+        </div>
+      </Container>
     );
   }
 
+  if (loadState !== 'ready') {
+    return (
+      <Container size="md">
+        <StateMessage
+          alert={loadState === 'failed'}
+          emoji={loadState === 'missing' ? '🔍' : '😕'}
+          title={loadState === 'missing' ? 'This recipe no longer exists' : 'Could not load this recipe'}
+          action={<Button to="/admin" variant="primary">Back to dashboard</Button>}
+        />
+      </Container>
+    );
+  }
+
+  const videoId = form.youtube_link ? getYouTubeId(form.youtube_link) : null;
+
   return (
-    <div style={{ backgroundColor: colors.bgPrimary }} className="min-h-screen">
-      {/* Header */}
-      <div style={{ backgroundColor: colors.cardBg, borderBottom: `3px solid ${colors.pixelBorder}` }} className="py-3 sm:py-4">
-        <Container>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => navigate('/admin')}>&lt; BACK</Button>
-            <h1 style={{ ...fonts.h3, color: colors.textPrimary, fontSize: undefined }} className="text-[10px] sm:text-sm">
-              {isEdit ? 'Edit Recipe' : 'New Recipe'}
-            </h1>
-          </div>
-        </Container>
-      </div>
+    <Container size="md" className="py-4 sm:py-8">
+      <Link
+        to="/admin"
+        onClick={(e) => { if (dirty && !confirm('Discard your changes?')) e.preventDefault(); }}
+        className="inline-flex items-center gap-1.5 min-h-11 text-base font-extrabold text-ink-soft no-underline hover:text-primary-ink"
+      >
+        <ArrowLeftIcon className="w-5 h-5" />
+        Dashboard
+      </Link>
+      <h1 className="text-title text-ink mt-1 mb-5">{isEdit ? 'Edit recipe' : 'New recipe'}</h1>
 
-      <Container size="md" className="py-6 sm:py-10">
-        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
-          {/* Basic Info */}
-          <Card variant="default" className="p-4 sm:p-6 space-y-4">
-            <Input label="TITLE" value={form.title} onChange={(e) => updateField('title', e.target.value)} placeholder="Recipe name" />
-            <Textarea label="DESCRIPTION" value={form.description} onChange={(e) => updateField('description', e.target.value)} placeholder="Short description" />
-          </Card>
+      <form onSubmit={handleSubmit} noValidate className="space-y-5">
+        {/* Basics */}
+        <Card variant="default" className="p-4 sm:p-6 space-y-4">
+          <Input
+            label="Title"
+            value={form.title}
+            onChange={(e) => updateField('title', e.target.value)}
+            placeholder="Recipe name"
+            error={errors.title}
+          />
+          <Textarea
+            label="Description"
+            value={form.description}
+            onChange={(e) => updateField('description', e.target.value)}
+            placeholder="One or two sentences about the dish"
+            error={errors.description}
+          />
+        </Card>
 
-          {/* Image Upload */}
-          <Card variant="default" className="p-4 sm:p-6">
-            <h3 style={{ ...fonts.h3, color: colors.textPrimary, fontSize: undefined }} className="text-[11px] sm:text-sm mb-4">
-              Photos ({form.images.length}/{MAX_IMAGES})
-            </h3>
+        {/* Photos */}
+        <Card variant="default" className="p-4 sm:p-6">
+          <h2 className="text-subheading text-ink">Photos ({form.images.length}/{MAX_IMAGES})</h2>
+          <p className="text-sm text-ink-muted mb-3">
+            The first photo is the cover. Photos are shrunk automatically before upload.
+          </p>
 
-            {/* Image grid */}
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              {form.images.map((url, i) => (
-                <div key={url} className="relative group">
-                  <img
-                    src={url}
-                    alt={`Recipe ${i + 1}`}
-                    className="w-full h-24 sm:h-32 object-cover rounded-lg"
-                    style={{ border: i === 0 ? `3px solid ${colors.primary}` : `2px solid ${colors.gray200}` }}
-                  />
-                  {i === 0 && (
-                    <span
-                      style={{
-                        position: 'absolute', bottom: '4px', left: '4px',
-                        fontFamily: "'Nunito', sans-serif", fontWeight: 800,
-                        fontSize: '9px', backgroundColor: colors.primary,
-                        color: '#fff', padding: '2px 6px', borderRadius: '6px',
-                      }}
-                    >
-                      COVER
-                    </span>
-                  )}
+          <ul className="grid grid-cols-3 gap-2 sm:gap-3">
+            {form.images.map((url, i) => (
+              <li key={url} className={`relative aspect-square overflow-hidden border-[3px] ${i === 0 ? 'border-primary' : 'border-line-soft'}`}>
+                <RecipeImage src={url} alt={`Photo ${i + 1}`} />
+                {/* Always visible: a hover-only button cannot be found on a touch screen */}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveImage(i)}
+                  aria-label={`Remove photo ${i + 1}`}
+                  className="absolute top-0 right-0 flex items-center justify-center w-11 h-11"
+                >
+                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[#2B2B3D]/85 text-white">
+                    <CloseIcon className="w-4 h-4" strokeWidth={3} />
+                  </span>
+                </button>
+                {i === 0 ? (
+                  <span className="absolute bottom-1 left-1 bg-primary text-on-fill text-[0.8125rem] font-extrabold px-2 py-0.5">
+                    Cover
+                  </span>
+                ) : (
                   <button
                     type="button"
-                    onClick={() => handleRemoveImage(i)}
-                    style={{
-                      position: 'absolute', top: '4px', right: '4px',
-                      width: '24px', height: '24px', borderRadius: '50%',
-                      backgroundColor: 'rgba(0,0,0,0.6)', color: '#fff',
-                      border: 'none', cursor: 'pointer', fontSize: '12px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => handleMakeCover(i)}
+                    className="absolute bottom-0 inset-x-0 min-h-9 bg-surface/95 text-ink text-[0.8125rem] font-extrabold"
                   >
-                    x
+                    Make cover
                   </button>
-                </div>
-              ))}
+                )}
+              </li>
+            ))}
 
-              {/* Upload button */}
-              {form.images.length < MAX_IMAGES && (
+            {form.images.length < MAX_IMAGES && (
+              <li className="aspect-square">
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
-                  style={{
-                    border: `2px dashed ${colors.gray300}`,
-                    borderRadius: '12px',
-                    backgroundColor: colors.gray50,
-                    cursor: uploading ? 'wait' : 'pointer',
-                    display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', justifyContent: 'center',
-                    gap: '4px', transition: 'all 0.15s ease',
-                  }}
-                  className="h-24 sm:h-32 hover:border-primary"
+                  className={`w-full h-full flex flex-col items-center justify-center gap-1 border-2 border-dashed bg-surface-alt text-sm font-bold text-ink-soft hover:border-primary disabled:cursor-wait ${
+                    errors.images ? 'border-primary-ink' : 'border-line'
+                  }`}
                 >
-                  {uploading ? (
-                    <span style={{ fontFamily: "'Nunito', sans-serif", fontSize: '12px', color: colors.textMuted }}>
-                      Uploading...
-                    </span>
-                  ) : (
-                    <>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={colors.textMuted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                        <circle cx="8.5" cy="8.5" r="1.5" />
-                        <polyline points="21 15 16 10 5 21" />
-                      </svg>
-                      <span style={{ fontFamily: "'Nunito', sans-serif", fontSize: '11px', color: colors.textMuted }}>
-                        Add photo
-                      </span>
-                    </>
-                  )}
+                  <span className="text-2xl leading-none" aria-hidden="true">{uploading ? '⏳' : '📷'}</span>
+                  {uploading ? 'Uploading…' : 'Add photo'}
                 </button>
-              )}
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-
-            <p style={{ fontFamily: "'Nunito', sans-serif", fontSize: '11px', color: colors.textMuted }}>
-              First image is the cover. Max {MAX_IMAGES} images. JPG, PNG, or WebP.
-            </p>
-          </Card>
-
-          {/* YouTube Link */}
-          <Card variant="default" className="p-4 sm:p-6">
-            <Input
-              label="YOUTUBE VIDEO LINK (OPTIONAL)"
-              value={form.youtube_link ?? ''}
-              onChange={(e) => updateField('youtube_link', e.target.value)}
-              placeholder="https://www.youtube.com/watch?v=..."
-            />
-            {form.youtube_link && getYouTubeId(form.youtube_link) && (
-              <div className="mt-3 rounded-lg overflow-hidden" style={{ border: `2px solid ${colors.gray200}` }}>
-                <iframe
-                  src={youTubeEmbedUrl(getYouTubeId(form.youtube_link)!)}
-                  className="w-full h-40 sm:h-52"
-                  allowFullScreen
-                  title="Video preview"
-                  style={{ border: 'none' }}
-                />
-              </div>
+              </li>
             )}
-          </Card>
-
-          {/* Details */}
-          <Card variant="default" className="p-4 sm:p-6 space-y-4">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <Input label="PREP TIME" value={form.prep_time} onChange={(e) => updateField('prep_time', e.target.value)} placeholder="10 min" />
-              <Input label="COOK TIME" value={form.cook_time} onChange={(e) => updateField('cook_time', e.target.value)} placeholder="20 min" />
-              <Input label="SERVINGS" type="number" value={String(form.servings)} onChange={(e) => updateField('servings', parseInt(e.target.value) || 1)} />
-              <Select
-                label="DIFFICULTY"
-                value={form.difficulty}
-                onChange={(val) => updateField('difficulty', val as RecipeInput['difficulty'])}
-                options={[
-                  { value: 'Easy', label: 'Easy' },
-                  { value: 'Medium', label: 'Medium' },
-                  { value: 'Hard', label: 'Hard' },
-                ]}
-              />
-            </div>
-
-            <Select
-              label="CATEGORY"
-              value={form.category_id}
-              onChange={(val) => updateField('category_id', val)}
-              placeholder="Select category..."
-              options={categories.map((c) => ({ value: c.id, label: c.name }))}
-            />
-
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.is_featured}
-                onChange={(e) => updateField('is_featured', e.target.checked)}
-                className="w-5 h-5 accent-primary"
-              />
-              <span style={{ color: colors.textPrimary, fontFamily: "'Nunito', sans-serif", fontWeight: 600 }} className="text-sm">
-                Featured recipe (shows on homepage)
-              </span>
-            </label>
-          </Card>
-
-          {/* Ingredients */}
-          <Card variant="pastel-pink" className="p-4 sm:p-6">
-            <h3 style={{ ...fonts.h3, color: colors.textPrimary, fontSize: undefined }} className="mb-4 text-[11px] sm:text-sm">
-              Ingredients
-            </h3>
-            <div className="space-y-2">
-              {form.ingredients.map((item, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span style={{ ...fonts.tag, color: colors.primary }} className="shrink-0 text-[7px] sm:text-[8px] w-6 text-center">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <input
-                    value={item}
-                    onChange={(e) => updateListItem('ingredients', i, e.target.value)}
-                    placeholder="e.g. 1 cup flour"
-                    style={{
-                      fontFamily: "'Nunito', sans-serif", fontSize: '14px',
-                      backgroundColor: colors.cardBg, border: `1.5px solid ${colors.primary}`,
-                      padding: '10px 14px', width: '100%', outline: 'none', color: colors.textPrimary,
-                    }}
-                    className="flex-1"
-                  />
-                  <button
-                    type="button" onClick={() => removeListItem('ingredients', i)}
-                    style={{ color: colors.error, fontFamily: "'Nunito', sans-serif", fontWeight: 700, border: 'none', background: 'none', cursor: 'pointer' }}
-                    className="text-sm px-1"
-                  >
-                    x
-                  </button>
-                </div>
-              ))}
-            </div>
-            <button
-              type="button" onClick={() => addListItem('ingredients')}
-              style={{ color: colors.primary, fontFamily: "'Nunito', sans-serif", fontWeight: 700, border: 'none', background: 'none', cursor: 'pointer' }}
-              className="mt-3 text-sm"
-            >
-              + Add ingredient
-            </button>
-          </Card>
-
-          {/* Instructions */}
-          <Card variant="pastel-mint" className="p-4 sm:p-6">
-            <h3 style={{ ...fonts.h3, color: colors.textPrimary, fontSize: undefined }} className="mb-4 text-[11px] sm:text-sm">
-              Instructions
-            </h3>
-            <div className="space-y-2">
-              {form.instructions.map((step, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <span
-                    style={{
-                      ...fonts.tag, color: colors.textLight, backgroundColor: colors.accent,
-                      border: `2px solid ${colors.pixelBorder}`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    }}
-                    className="w-6 h-6 sm:w-7 sm:h-7 text-[7px] sm:text-[8px] mt-2"
-                  >
-                    {i + 1}
-                  </span>
-                  <textarea
-                    value={step}
-                    onChange={(e) => updateListItem('instructions', i, e.target.value)}
-                    placeholder={`Step ${i + 1}...`}
-                    style={{
-                      fontFamily: "'Nunito', sans-serif", fontSize: '14px',
-                      backgroundColor: colors.cardBg, border: `1.5px solid ${colors.accent}`,
-                      padding: '10px 14px', width: '100%', outline: 'none', color: colors.textPrimary,
-                      minHeight: '60px', resize: 'vertical',
-                    }}
-                    className="flex-1"
-                  />
-                  <button
-                    type="button" onClick={() => removeListItem('instructions', i)}
-                    style={{ color: colors.error, fontFamily: "'Nunito', sans-serif", fontWeight: 700, border: 'none', background: 'none', cursor: 'pointer' }}
-                    className="text-sm px-1 mt-2"
-                  >
-                    x
-                  </button>
-                </div>
-              ))}
-            </div>
-            <button
-              type="button" onClick={() => addListItem('instructions')}
-              style={{ color: colors.accent, fontFamily: "'Nunito', sans-serif", fontWeight: 700, border: 'none', background: 'none', cursor: 'pointer' }}
-              className="mt-3 text-sm"
-            >
-              + Add step
-            </button>
-          </Card>
-
-          {/* Error & Submit */}
-          {error && (
-            <p style={{ color: colors.error, fontFamily: "'Nunito', sans-serif" }} className="text-sm text-center">
-              {error}
-            </p>
+          </ul>
+          {errors.images && (
+            <p role="alert" className="mt-2 text-sm font-semibold text-primary-ink">{errors.images}</p>
           )}
 
-          <div className="flex gap-3 justify-end">
-            <Button variant="outline" size="md" type="button" onClick={() => navigate('/admin')}>CANCEL</Button>
-            <Button variant="primary" size="md" type="submit" disabled={saving}>
-              {saving ? 'SAVING...' : isEdit ? 'UPDATE' : 'CREATE'}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+        </Card>
+
+        {/* Details */}
+        <Card variant="default" className="p-4 sm:p-6 space-y-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <Input
+              label="Prep time"
+              value={form.prep_time}
+              onChange={(e) => updateField('prep_time', e.target.value)}
+              placeholder="10 min"
+            />
+            <Input
+              label="Cook time"
+              value={form.cook_time}
+              onChange={(e) => updateField('cook_time', e.target.value)}
+              placeholder="20 min"
+            />
+            <Input
+              label="Servings"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              value={String(form.servings)}
+              onChange={(e) => updateField('servings', Math.max(1, parseInt(e.target.value, 10) || 1))}
+            />
+            <Select
+              label="Difficulty"
+              value={form.difficulty}
+              onChange={(value) => updateField('difficulty', value as RecipeInput['difficulty'])}
+              options={[
+                { value: 'Easy', label: 'Easy' },
+                { value: 'Medium', label: 'Medium' },
+                { value: 'Hard', label: 'Hard' },
+              ]}
+            />
+          </div>
+
+          <Select
+            label="Category"
+            value={form.category_id}
+            onChange={(value) => updateField('category_id', value)}
+            placeholder="Choose a category…"
+            options={categories.map((c) => ({ value: c.id, label: c.name }))}
+            error={errors.category_id}
+          />
+
+          <label className="flex items-center gap-3 min-h-11 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.is_featured}
+              onChange={(e) => updateField('is_featured', e.target.checked)}
+              className="w-6 h-6 shrink-0 accent-primary"
+            />
+            <span className="text-base font-bold text-ink">Featured: show on the home page</span>
+          </label>
+        </Card>
+
+        <ListEditor
+          title="Ingredients"
+          tone="pastel-pink"
+          items={form.ingredients}
+          onChange={(items) => updateField('ingredients', items)}
+          placeholder={() => 'e.g. 1 cup flour'}
+          addLabel="+ Add ingredient"
+        />
+
+        <ListEditor
+          title="Steps"
+          tone="pastel-mint"
+          multiline
+          items={form.instructions}
+          onChange={(items) => updateField('instructions', items)}
+          placeholder={(i) => `Step ${i + 1}`}
+          addLabel="+ Add step"
+        />
+
+        {/* Video */}
+        <Card variant="default" className="p-4 sm:p-6">
+          <Input
+            label="YouTube video link (optional)"
+            type="url"
+            inputMode="url"
+            value={form.youtube_link ?? ''}
+            onChange={(e) => updateField('youtube_link', e.target.value)}
+            placeholder="https://www.youtube.com/watch?v=..."
+            error={form.youtube_link?.trim() && !videoId ? 'This does not look like a YouTube link.' : undefined}
+          />
+          {videoId && (
+            <div className="relative aspect-video mt-3 border-2 border-line-soft">
+              <iframe
+                src={youTubeEmbedUrl(videoId)}
+                title="Video preview"
+                loading="lazy"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full border-0"
+              />
+            </div>
+          )}
+        </Card>
+
+        {/* Actions: stay on screen while the long form scrolls */}
+        <div className="sticky bottom-0 z-10 -mx-4 px-4 sm:-mx-6 sm:px-6 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] bg-bg border-t-2 border-line-soft">
+          {formError && (
+            <p role="alert" className="mb-2 text-base font-semibold text-primary-ink sm:text-right">{formError}</p>
+          )}
+          <div className="flex gap-3 sm:justify-end">
+            <Button variant="outline" onClick={handleCancel} className="flex-1 sm:flex-none">Cancel</Button>
+            <Button variant="primary" type="submit" disabled={saving || uploading} className="flex-1 sm:flex-none">
+              {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Create recipe'}
             </Button>
           </div>
-        </form>
-      </Container>
-    </div>
+        </div>
+      </form>
+    </Container>
+  );
+}
+
+// ── Editable list (ingredients, steps) ──
+
+interface ListEditorProps {
+  title: string;
+  tone: 'pastel-pink' | 'pastel-mint';
+  items: string[];
+  onChange: (items: string[]) => void;
+  placeholder: (index: number) => string;
+  addLabel: string;
+  /** Use a taller text box per item: for steps, which are sentences. */
+  multiline?: boolean;
+}
+
+function ListEditor({ title, tone, items, onChange, placeholder, addLabel, multiline = false }: ListEditorProps) {
+  /** Row to put the cursor in when it appears: the one just added. */
+  const [focusIndex, setFocusIndex] = useState<number | null>(null);
+
+  const update = (index: number, value: string) => onChange(items.map((item, i) => (i === index ? value : item)));
+
+  const add = () => {
+    setFocusIndex(items.length);
+    onChange([...items, '']);
+  };
+
+  const remove = (index: number) => {
+    setFocusIndex(null);
+    const next = items.filter((_, i) => i !== index);
+    onChange(next.length ? next : ['']);
+  };
+
+  return (
+    <Card variant={tone} className="p-4 sm:p-6">
+      <h2 className="text-subheading text-ink mb-3">{title}</h2>
+      <ol className="space-y-2">
+        {items.map((item, i) => (
+          <li key={i} className="flex items-start gap-2">
+            <span aria-hidden="true" className="shrink-0 w-7 pt-3 text-right text-base font-extrabold text-ink-soft">
+              {i + 1}.
+            </span>
+            {multiline ? (
+              <textarea
+                value={item}
+                rows={2}
+                autoFocus={focusIndex === i}
+                aria-label={`${title} ${i + 1}`}
+                placeholder={placeholder(i)}
+                onChange={(e) => update(i, e.target.value)}
+                className={`${fieldClasses} flex-1 resize-y`}
+              />
+            ) : (
+              <input
+                value={item}
+                autoFocus={focusIndex === i}
+                aria-label={`${title} ${i + 1}`}
+                placeholder={placeholder(i)}
+                enterKeyHint="next"
+                onChange={(e) => update(i, e.target.value)}
+                // Enter moves on to a new row instead of submitting the whole form by accident.
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } }}
+                className={`${fieldClasses} flex-1`}
+              />
+            )}
+            <button
+              type="button"
+              onClick={() => remove(i)}
+              aria-label={`Remove ${title.toLowerCase()} ${i + 1}`}
+              className="shrink-0 flex items-center justify-center w-11 h-12 text-ink-soft hover:text-primary-ink"
+            >
+              <CloseIcon className="w-5 h-5" />
+            </button>
+          </li>
+        ))}
+      </ol>
+      <Button variant="outline" size="sm" onClick={add} className="mt-3">{addLabel}</Button>
+    </Card>
   );
 }

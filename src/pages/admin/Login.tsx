@@ -1,20 +1,26 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, type FormEvent } from 'react';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
-import { fonts } from '../../themes/font';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { Card, Button, Input } from '../../components/common';
+import { ArrowLeftIcon } from '../../components/icons';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const { login } = useAuth();
+  const { login, isLoggedIn, checking } = useAuth();
   const navigate = useNavigate();
-  const { colors } = useTheme();
+  const location = useLocation();
+  useDocumentTitle('Admin login');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Where the visitor was heading before being asked to log in.
+  const destination = (location.state as { from?: string } | null)?.from ?? '/admin';
+
+  if (!checking && isLoggedIn) return <Navigate to={destination} replace />;
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (submitting) return;
     setError('');
@@ -22,7 +28,7 @@ export default function Login() {
     try {
       const failure = await login(username, password);
       if (failure) setError(failure);
-      else navigate('/admin');
+      else navigate(destination, { replace: true });
     } catch {
       setError('Could not reach the server. Try again.');
     }
@@ -30,53 +36,52 @@ export default function Login() {
   };
 
   return (
-    <div
-      style={{ backgroundColor: colors.bgPrimary }}
-      className="min-h-screen flex items-center justify-center p-4 pixel-hearts"
-    >
+    <div className="min-h-dvh bg-bg pixel-hearts flex flex-col items-center justify-center p-4">
       <Card variant="default" className="w-full max-w-sm p-6 sm:p-8">
         <div className="text-center mb-6">
-          <span className="text-3xl">🔒</span>
-          <h1
-            style={{ ...fonts.h2, color: colors.textPrimary, fontSize: undefined }}
-            className="mt-3 text-sm sm:text-base"
-          >
-            Secret Kitchen
-          </h1>
-          <p style={{ color: colors.textMuted, fontFamily: "'Nunito', sans-serif" }} className="text-xs sm:text-sm mt-1">
-            Admin access only
-          </p>
+          <span className="text-4xl" aria-hidden="true">🔒</span>
+          <h1 className="text-heading text-ink mt-2">Secret Kitchen</h1>
+          <p className="text-base text-ink-muted">Admin access only</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="USERNAME"
+            label="Username"
             type="text"
-            placeholder="Enter username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            required
           />
           <Input
-            label="PASSWORD"
+            label="Password"
             type="password"
-            placeholder="Enter password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
+            required
           />
 
           {error && (
-            <p style={{ color: colors.error, fontFamily: "'Nunito', sans-serif" }} className="text-xs sm:text-sm text-center">
-              {error}
-            </p>
+            <p role="alert" className="text-base font-semibold text-primary-ink text-center">{error}</p>
           )}
 
-          <Button variant="primary" size="md" type="submit" style={{ width: '100%' }} disabled={submitting}>
-            {submitting ? 'CHECKING...' : 'ENTER'}
+          <Button variant="primary" type="submit" fullWidth disabled={submitting}>
+            {submitting ? 'Checking…' : 'Log in'}
           </Button>
         </form>
       </Card>
+
+      <Link
+        to="/"
+        className="mt-6 inline-flex items-center gap-1.5 min-h-11 text-base font-extrabold text-ink-soft no-underline hover:text-primary-ink"
+      >
+        <ArrowLeftIcon className="w-5 h-5" />
+        Back to Yumli
+      </Link>
     </div>
   );
 }

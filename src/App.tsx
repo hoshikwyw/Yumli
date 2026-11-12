@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { FavoritesProvider } from './context/FavoritesContext';
@@ -10,9 +11,13 @@ import Recipes from './pages/Recipes';
 import RecipeDetail from './pages/RecipeDetail';
 import About from './pages/About';
 import NotFound from './pages/NotFound';
-import Login from './pages/admin/Login';
-import Dashboard from './pages/admin/Dashboard';
-import RecipeForm from './pages/admin/RecipeForm';
+
+// The admin screens are downloaded only when someone opens them, so visitors
+// who just want a recipe never pay for the dashboard and the recipe editor.
+const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
+const Login = lazy(() => import('./pages/admin/Login'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const RecipeForm = lazy(() => import('./pages/admin/RecipeForm'));
 
 function App() {
   return (
@@ -22,22 +27,26 @@ function App() {
           <AuthProvider>
             <Router>
               <ScrollToTop />
-              <Routes>
-                {/* Admin: its own screens, without the public header and footer */}
-                <Route path="/admin/login" element={<Login />} />
-                <Route path="/admin" element={<Dashboard />} />
-                <Route path="/admin/new" element={<RecipeForm />} />
-                <Route path="/admin/edit/:id" element={<RecipeForm />} />
+              <Suspense fallback={<div role="status" aria-label="Loading" className="min-h-dvh bg-bg" />}>
+                <Routes>
+                  {/* Admin: its own frame, which also checks the login */}
+                  <Route path="/admin/login" element={<Login />} />
+                  <Route element={<AdminLayout />}>
+                    <Route path="/admin" element={<Dashboard />} />
+                    <Route path="/admin/new" element={<RecipeForm />} />
+                    <Route path="/admin/edit/:id" element={<RecipeForm />} />
+                  </Route>
 
-                {/* Public pages share one layout */}
-                <Route element={<PublicLayout />}>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/recipes" element={<Recipes />} />
-                  <Route path="/recipes/:id" element={<RecipeDetail />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="*" element={<NotFound />} />
-                </Route>
-              </Routes>
+                  {/* Public pages share one layout */}
+                  <Route element={<PublicLayout />}>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/recipes" element={<Recipes />} />
+                    <Route path="/recipes/:id" element={<RecipeDetail />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Route>
+                </Routes>
+              </Suspense>
             </Router>
           </AuthProvider>
         </FavoritesProvider>
