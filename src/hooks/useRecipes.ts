@@ -1,70 +1,67 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Recipe, Category } from '../types';
 import * as recipeService from '../services/recipeService';
 
-interface UseRecipesResult {
-  recipes: Recipe[];
+interface AsyncState<T> {
+  data: T;
   loading: boolean;
   error: string | null;
 }
 
-export function useRecipes(): UseRecipesResult {
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+/**
+ * Runs `load` when the component appears (and again whenever `load` changes),
+ * and tracks loading and failure. `reload` lets a "Try again" button repeat it.
+ * Pass a stable `load`: a module-level function or one wrapped in useCallback.
+ */
+function useAsync<T>(load: () => Promise<T>, initial: T) {
+  const [state, setState] = useState<AsyncState<T>>({ data: initial, loading: true, error: null });
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    recipeService.getRecipes()
-      .then(setRecipes)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+    // Ignore the answer if the component has gone or a newer request has started.
+    let stale = false;
+    load()
+      .then((data) => { if (!stale) setState({ data, loading: false, error: null }); })
+      .catch((e: unknown) => {
+        if (stale) return;
+        const message = e instanceof Error ? e.message : 'Request failed';
+        setState((prev) => ({ ...prev, loading: false, error: message }));
+      });
+    return () => { stale = true; };
+  }, [load, attempt]);
+
+  const reload = useCallback(() => {
+    setState((prev) => ({ ...prev, loading: true, error: null }));
+    setAttempt((n) => n + 1);
   }, []);
 
-  return { recipes, loading, error };
+  return { ...state, reload };
 }
 
-export function useFeaturedRecipes(): UseRecipesResult {
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const NO_RECIPES: Recipe[] = [];
+const NO_CATEGORIES: Category[] = [];
 
-  useEffect(() => {
-    recipeService.getFeaturedRecipes()
-      .then(setRecipes)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { recipes, loading, error };
+export function useRecipes() {
+  const { data, loading, error, reload } = useAsync(recipeService.getRecipes, NO_RECIPES);
+  return { recipes: data, loading, error, reload };
 }
 
+export function useFeaturedRecipes() {
+  const { data, loading, error, reload } = useAsync(recipeService.getFeaturedRecipes, NO_RECIPES);
+  return { recipes: data, loading, error, reload };
+}
+
+/** The page showing a recipe remounts when the id changes, so each id starts in the loading state. */
 export function useRecipeById(id: string) {
-  const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!id) { setLoading(false); return; }
-    setLoading(true);
-    recipeService.getRecipeById(id)
-      .then(setRecipe)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  return { recipe, loading, error };
+  const load = useCallback(
+    () => (id ? recipeService.getRecipeById(id) : Promise.resolve(null)),
+    [id],
+  );
+  const { data, loading, error, reload } = useAsync<Recipe | null>(load, null);
+  return { recipe: data, loading, error, reload };
 }
 
 export function useCategories() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    recipeService.getCategories()
-      .then(setCategories)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { categories, loading };
+  const { data, loading, error, reload } = useAsync(recipeService.getCategories, NO_CATEGORIES);
+  return { categories: data, loading, error, reload };
 }

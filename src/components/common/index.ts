@@ -6,3 +6,5 @@ export { default as PageHeader } from './PageHeader';
 export { default as Container } from './Container';
 export { default as Skeleton, RecipeCardSkeleton } from './Skeleton';
 export { default as Select } from './Select';
+export { default as RecipeImage } from './RecipeImage';
+export { default as StateMessage } from './StateMessage';

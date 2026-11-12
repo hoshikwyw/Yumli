@@ -1,147 +1,64 @@
-import type { Recipe } from '../types';
-import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { fonts } from '../themes/font';
-import { Button, Card, Container } from './common';
-import { Link } from 'react-router-dom';
+import { Button, Container } from './common';
+import { ArrowRightIcon } from './icons';
 
-interface HeroSectionProps {
-  featuredRecipe: Recipe;
-}
+/* Decorative food pictures: a tidy row of three on phones, an overlapping collage from tablet up. */
+const tiles = [
+  { src: '/stew.png', position: 'md:top-0 md:right-0 md:w-44 md:h-44 lg:w-64 lg:h-64' },
+  { src: '/fish.png', position: 'md:bottom-0 md:left-[18%] md:w-36 md:h-36 lg:w-52 lg:h-52' },
+  { src: '/noodle.png', position: 'md:top-6 md:left-[6%] md:w-20 md:h-20 lg:w-28 lg:h-28' },
+];
 
-export default function HeroSection({ featuredRecipe }: HeroSectionProps) {
-  const { colors } = useTheme();
+/**
+ * Top of the home page. It has no data to wait for, so it is on screen
+ * immediately, however slow the connection.
+ */
+export default function HeroSection() {
   const { t } = useTranslation();
 
   return (
-    <section>
-      {/* Hero Top */}
-      <div
-        style={{ backgroundColor: colors.bgPrimary }}
-        className="relative overflow-hidden pixel-hearts"
-      >
-        <Container className="py-10 sm:py-16 md:py-24 relative z-10">
-          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-16 items-center md:min-h-[60vh]">
-            {/* Left: Text */}
-            <div className="space-y-5 sm:space-y-8 text-center md:text-left">
-              <div
-                style={{ ...fonts.tag, color: colors.secondary, letterSpacing: '2px' }}
-              >
-                {t('hero.tagline')}
-              </div>
-
-              <div>
-                <h1 style={{ ...fonts.heroTitle, color: colors.textPrimary, fontSize: undefined }}>
-                  <span className="text-xl sm:text-2xl md:text-3xl lg:text-[38px] block leading-relaxed">
-                    {t('hero.title1')}
-                  </span>
-                  <span
-                    className="text-xl sm:text-2xl md:text-3xl lg:text-[38px] block leading-relaxed"
-                    style={{ color: colors.primary }}
-                  >
-                    {t('hero.title2')}
-                  </span>
-                </h1>
-              </div>
-
-              <p
-                style={{ ...fonts.body, color: colors.textSecondary, lineHeight: '1.8' }}
-                className="mx-auto md:mx-0 max-w-[400px] text-sm sm:text-base"
-              >
-                {t('hero.subtitle')}
-              </p>
-
-              <div className="flex gap-4 justify-center md:justify-start">
-                <Link to="/recipes">
-                  <Button variant="primary" size="lg">
-                    {t('hero.cta')}
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            {/* Right: Food images — hidden on small mobile */}
-            <div className="relative h-[220px] sm:h-[320px] md:h-[420px] hidden sm:block">
-              <div
-                style={{
-                  border: `3px solid ${colors.pixelBorder}`,
-                  boxShadow: `4px 4px 0px ${colors.pixelBorder}`,
-                  backgroundColor: colors.cardBg,
-                  overflow: 'hidden',
-                }}
-                className="absolute top-2 right-2 w-[140px] h-[140px] sm:w-[180px] sm:h-[180px] md:w-[240px] md:h-[240px]"
-              >
-                <img src="/stew.png" alt="Stew" className="w-full h-full object-cover" />
-              </div>
-
-              <div
-                style={{
-                  border: `3px solid ${colors.pixelBorder}`,
-                  boxShadow: `4px 4px 0px ${colors.pixelBorder}`,
-                  backgroundColor: colors.cardBg,
-                  overflow: 'hidden',
-                }}
-                className="absolute bottom-2 right-8 w-[120px] h-[120px] sm:w-[160px] sm:h-[160px] md:w-[200px] md:h-[200px]"
-              >
-                <img src="/fish.png" alt="Fish" className="w-full h-full object-cover" />
-              </div>
-
-              <div
-                style={{
-                  border: `2px solid ${colors.pixelBorder}`,
-                  boxShadow: `3px 3px 0px ${colors.pixelBorder}`,
-                  backgroundColor: colors.cardBg,
-                  overflow: 'hidden',
-                  zIndex: 10,
-                }}
-                className="absolute top-1/2 left-2 -translate-y-1/2 w-[60px] h-[60px] sm:w-[80px] sm:h-[80px] md:w-[100px] md:h-[100px]"
-              >
-                <img src="/noodle.png" alt="Noodle" className="w-full h-full object-cover" />
-              </div>
-
-              <div className="absolute top-4 right-[50%] animate-float hidden md:block">
-                <img src="/bread.png" alt="" className="w-10 h-10 md:w-12 md:h-12 object-cover" />
-              </div>
+    <section className="relative overflow-hidden bg-bg pixel-hearts">
+      <Container className="py-10 sm:py-14 md:py-20">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
+          <div className="text-center md:text-left">
+            <p className="text-eyebrow text-secondary-ink">{t('hero.tagline')}</p>
+            <h1 className="text-display text-ink mt-3">
+              <span className="block">{t('hero.title1')}</span>
+              <span className="block text-primary-ink">{t('hero.title2')}</span>
+            </h1>
+            <p className="text-lead text-ink-soft mt-4 max-w-md mx-auto md:mx-0">
+              {t('hero.subtitle')}
+            </p>
+            <div className="mt-6 sm:mt-8">
+              <Button to="/recipes" variant="primary" size="lg" className="w-full sm:w-auto">
+                {t('hero.cta')}
+                <ArrowRightIcon className="w-5 h-5" />
+              </Button>
             </div>
           </div>
-        </Container>
 
-        <div className="pixel-divider" />
-      </div>
-
-      {/* Featured Recipe */}
-      <div style={{ backgroundColor: colors.bgLight }} className="py-10 sm:py-16">
-        <Container>
-          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
-            <Card variant="default">
-              <img
-                src={featuredRecipe.images?.[0] ?? featuredRecipe.image}
-                alt={featuredRecipe.title}
-                className="w-full h-48 sm:h-56 md:h-72 object-cover"
-              />
-            </Card>
-
-            <div className="space-y-4 sm:space-y-6">
-              <h2
-                style={{ ...fonts.h2, color: colors.textPrimary, fontSize: undefined }}
-                className="text-sm sm:text-base md:text-lg mb-2"
+          <div
+            aria-hidden="true"
+            className="grid grid-cols-3 gap-3 sm:gap-4 w-full max-w-sm mx-auto md:max-w-none md:block md:relative md:h-80 lg:h-[420px]"
+          >
+            {tiles.map((tile) => (
+              <div
+                key={tile.src}
+                className={`aspect-square md:aspect-auto md:absolute bg-surface pixel-box overflow-hidden ${tile.position}`}
               >
-                {featuredRecipe.title}
-              </h2>
-              <p style={{ ...fonts.body, color: colors.textSecondary, lineHeight: '1.8' }}
-                className="text-sm sm:text-base"
-              >
-                {featuredRecipe.description}
-              </p>
-              <Link to="/recipes">
-                <Button variant="primary" size="md">
-                  {t('common.browseRecipes')}
-                </Button>
-              </Link>
-            </div>
+                <img src={tile.src} alt="" className="w-full h-full object-cover" />
+              </div>
+            ))}
+            <img
+              src="/bread.png"
+              alt=""
+              className="hidden md:block absolute bottom-8 right-[12%] w-12 h-12 object-cover animate-float"
+            />
           </div>
-        </Container>
-      </div>
+        </div>
+      </Container>
+
+      <div className="pixel-divider" />
     </section>
   );
 }

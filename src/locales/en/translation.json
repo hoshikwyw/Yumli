@@ -11,11 +11,11 @@
     "admin": "Admin"
   },
   "hero": {
-    "tagline": "YOUR COZY KITCHEN COMPANION",
+    "tagline": "Your cozy kitchen companion",
     "title1": "Cook for",
     "title2": "Yourself",
     "subtitle": "Because the best meals are the ones you make with love \u2014 even if it's just for you. Simple recipes, cozy vibes, no stress.",
-    "cta": "LET'S COOK"
+    "cta": "Let's cook"
   },
   "home": {
     "featuredRecipes": "Try These Tonight",
@@ -30,14 +30,13 @@
     "tipText": "Prep your ingredients before you start cooking. It makes everything feel calm and organized \u2014 like a real cooking show, but cozier.",
     "quickPicksTitle": "What Sounds Good?",
     "quickPicksSubtitle": "Pick a vibe and we'll find recipes for you",
-    "pickBreakfast": "Breakfast",
-    "pickBreakfastDesc": "Easy morning meals to start your day right",
-    "pickMainCourse": "Main Course",
-    "pickMainCourseDesc": "Hearty dinners for a cozy night in",
-    "pickDessert": "Dessert",
-    "pickDessertDesc": "Sweet treats because you deserve it",
     "pickQuick": "Under 10 min",
-    "pickQuickDesc": "Super fast recipes when you're short on time"
+    "recipeCount_one": "{{count}} recipe",
+    "recipeCount_other": "{{count}} recipes",
+    "featuredLabel": "Today's pick",
+    "seeAll": "See all recipes",
+    "emptyTitle": "No recipes yet!",
+    "emptyText": "Recipes will show up here once they're added. Check back soon!"
   },
   "recipes": {
     "title": "Recipe Collection",
@@ -47,7 +46,7 @@
     "noResultsHint": "Try searching for something else!",
     "all": "ALL",
     "view": "VIEW",
-    "letsCook": "COOK THIS",
+    "letsCook": "Cook this",
     "prep": "PREP",
     "cook": "COOK"
   },
@@ -99,8 +98,10 @@
     "madeWith": "Made with \u2665 and pixels"
   },
   "common": {
-    "browseRecipes": "EXPLORE RECIPES",
-    "unlockChef": "You're already a great chef!"
+    "browseRecipes": "Explore recipes",
+    "unlockChef": "You're already a great chef!",
+    "loadError": "We couldn't load the recipes. Check your connection and try again.",
+    "retry": "Try again"
   },
   "notFound": {
     "title": "Page not found",
@@ -113,5 +114,19 @@
     "text": "The kitchen had a little accident. Don't worry, nothing's burned!",
     "retry": "Try again",
     "home": "Back to home"
+  },
+  "categories": {
+    "breakfast": "Breakfast",
+    "main-course": "Main Course",
+    "dessert": "Dessert",
+    "salad": "Salad",
+    "soup": "Soup",
+    "snack": "Snack"
+  },
+  "card": {
+    "prepTime": "Prep time",
+    "serves": "Serves",
+    "save": "Save {{title}}",
+    "unsave": "Remove {{title}} from saved"
   }
 }

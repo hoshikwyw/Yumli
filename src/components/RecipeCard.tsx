@@ -1,144 +1,81 @@
-import type { Recipe } from '../types';
-import { useTheme } from '../context/ThemeContext';
-import { useFavorites } from '../context/FavoritesContext';
-import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import type { Recipe } from '../types';
+import { useFavorites } from '../context/FavoritesContext';
+import { useCategoryLabel } from '../hooks/useCategoryLabel';
+import { coverImage } from '../utils/recipe';
+import { RecipeImage } from './common';
+import { ClockIcon, HeartIcon, PeopleIcon } from './icons';
 
 interface RecipeCardProps {
   recipe: Recipe;
 }
 
+/**
+ * One recipe in a grid. The whole card is the link (its title link is
+ * stretched over the card), and the heart sits above it as a separate button,
+ * so there is no button nested inside a link.
+ */
 export default function RecipeCard({ recipe }: RecipeCardProps) {
-  const { colors } = useTheme();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { t } = useTranslation();
+  const categoryLabel = useCategoryLabel();
   const fav = isFavorite(recipe.id);
 
   return (
-    <Link to={`/recipes/${recipe.id}`} style={{ textDecoration: 'none' }}>
-      <div
-        style={{
-          backgroundColor: colors.cardBg,
-          borderRadius: '14px',
-          overflow: 'hidden',
-          border: `1.5px solid ${colors.gray200}`,
-          transition: 'all 0.25s ease',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-        className="group hover:shadow-lg hover:-translate-y-1"
-      >
-        {/* Image */}
-        <div className="relative overflow-hidden h-28 sm:h-40 md:h-48">
-          <img
-            src={recipe.images?.[0] ?? recipe.image}
-            alt={recipe.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+    <article className="group relative h-full flex flex-col bg-surface border-2 border-line-soft rounded-[14px] overflow-hidden transition-[box-shadow,translate,border-color] duration-200 hover:border-primary hover:shadow-lg hover:-translate-y-1 focus-within:border-primary">
+      <div className="relative aspect-[4/3] overflow-hidden">
+        <RecipeImage
+          src={coverImage(recipe)}
+          className="transition-transform duration-500 group-hover:scale-105"
+        />
+        {recipe.category && (
+          <span className="absolute bottom-2 left-2 max-w-[calc(100%-1rem)] truncate rounded-full bg-surface/95 px-2.5 py-0.5 text-[0.8125rem] font-bold text-ink">
+            {categoryLabel(recipe.category_slug, recipe.category)}
+          </span>
+        )}
+      </div>
 
-          {/* Category — small pill */}
-          <div
-            style={{
-              position: 'absolute', top: '6px', right: '6px',
-              fontFamily: "'Nunito', sans-serif",
-              fontWeight: 700,
-              backgroundColor: 'rgba(255,255,255,0.9)',
-              backdropFilter: 'blur(6px)',
-              color: colors.textSecondary,
-              borderRadius: '10px',
-            }}
-            className="text-[8px] sm:text-[9px] px-1.5 py-0.5 sm:px-2 sm:py-1"
-          >
-            {recipe.category}
-          </div>
-
-          {/* Favorite */}
-          <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(recipe.id); }}
-            style={{
-              position: 'absolute', top: '6px', left: '6px',
-              borderRadius: '50%',
-              backgroundColor: fav ? colors.primaryPastel : 'rgba(255,255,255,0.9)',
-              backdropFilter: 'blur(6px)',
-              border: 'none',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', transition: 'all 0.2s ease',
-            }}
-            className={`w-7 h-7 sm:w-8 sm:h-8 heart-pop ${fav ? 'animate-heartbeat' : ''}`}
-          >
-            <svg
-              className="w-3.5 h-3.5 sm:w-4 sm:h-4"
-              viewBox="0 0 24 24"
-              fill={fav ? colors.primary : 'none'}
-              stroke={fav ? colors.primary : colors.textMuted}
-              strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-            >
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-2.5 sm:p-3.5 md:p-4 flex flex-col flex-1">
-          {/* Title — use Nunito on mobile for readability, pixel font on larger */}
-          <h3
-            style={{ color: colors.textPrimary, fontWeight: 700 }}
-            className="mb-0.5 sm:mb-1 font-body text-[11px] leading-tight sm:text-sm sm:font-pixel sm:text-[11px] sm:leading-snug line-clamp-2"
+      <div className="flex flex-col flex-1 p-3 sm:p-4">
+        <h3 className="text-base sm:text-lg font-extrabold leading-snug text-ink line-clamp-2">
+          <Link
+            to={`/recipes/${recipe.id}`}
+            className="no-underline text-inherit outline-none after:absolute after:inset-0 after:rounded-[14px] focus-visible:after:outline-[3px] focus-visible:after:outline-focus focus-visible:after:-outline-offset-2"
           >
             {recipe.title}
-          </h3>
+          </Link>
+        </h3>
 
-          {/* Description — hidden on tiny mobile, visible from sm */}
-          <p
-            style={{ color: colors.textMuted, fontFamily: "'Nunito', sans-serif" }}
-            className="hidden sm:block mb-3 line-clamp-2 flex-1 text-xs leading-relaxed"
-          >
-            {recipe.description}
-          </p>
+        {/* Short teaser: only where the card is wide enough for it to read well */}
+        <p className="hidden sm:block mt-1 text-sm text-ink-muted line-clamp-2">{recipe.description}</p>
 
-          {/* Spacer on mobile where description is hidden */}
-          <div className="flex-1 sm:hidden" />
-
-          {/* Footer */}
-          <div className="flex items-center justify-between mt-1.5 sm:mt-0">
-            <div className="flex items-center gap-1.5 sm:gap-2.5">
-              <span
-                className="flex items-center gap-0.5 text-[9px] sm:text-[11px]"
-                style={{ color: colors.textMuted, fontFamily: "'Nunito', sans-serif", fontWeight: 600 }}
-              >
-                <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" viewBox="0 0 24 24" fill="none" stroke={colors.textMuted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-                </svg>
-                {recipe.prep_time}
-              </span>
-              <span
-                className="flex items-center gap-0.5 text-[9px] sm:text-[11px]"
-                style={{ color: colors.textMuted, fontFamily: "'Nunito', sans-serif", fontWeight: 600 }}
-              >
-                <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" viewBox="0 0 24 24" fill="none" stroke={colors.textMuted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
-                </svg>
-                {recipe.servings}
-              </span>
-            </div>
-
-            <div
-              style={{
-                fontFamily: "'Nunito', sans-serif",
-                fontWeight: 800,
-                color: colors.primary,
-                borderRadius: '10px',
-                backgroundColor: colors.primaryPastel,
-              }}
-              className="px-2 py-1 sm:px-3 sm:py-1.5 text-[8px] sm:text-[9px]"
-            >
-              {t('recipes.letsCook')}
-            </div>
-          </div>
+        <div className="mt-auto pt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold text-ink-soft">
+          {recipe.prep_time && (
+            <span className="inline-flex items-center gap-1">
+              <ClockIcon className="w-4 h-4" />
+              <span className="sr-only">{t('card.prepTime')}:</span>
+              {recipe.prep_time}
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1">
+            <PeopleIcon className="w-4 h-4" />
+            <span className="sr-only">{t('card.serves')}:</span>
+            {recipe.servings}
+          </span>
         </div>
       </div>
-    </Link>
+
+      <button
+        type="button"
+        onClick={() => toggleFavorite(recipe.id)}
+        aria-pressed={fav}
+        aria-label={t(fav ? 'card.unsave' : 'card.save', { title: recipe.title })}
+        className={`absolute top-2 right-2 z-10 flex items-center justify-center w-11 h-11 rounded-full border-2 heart-pop ${
+          fav ? 'bg-primary-soft border-primary text-primary-ink' : 'bg-surface/95 border-transparent text-ink-soft'
+        }`}
+      >
+        <HeartIcon className="w-5 h-5" fill={fav ? 'currentColor' : 'none'} />
+      </button>
+    </article>
   );
 }
