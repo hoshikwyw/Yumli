@@ -1,4 +1,5 @@
 import { Badge, Button, Card, StateMessage } from '@/components/ui';
+import { textLang } from '@/lib/lang';
 import RecipeImage from '@/features/recipes/components/RecipeImage';
 import { coverImage } from '@/features/recipes/utils';
 import type { Recipe } from '@/types';
@@ -33,7 +34,7 @@ export default function RecipeList({ recipes, deleting, onDelete }: RecipeListPr
                   <RecipeImage src={coverImage(recipe)} />
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-base sm:text-lg font-extrabold leading-snug text-ink line-clamp-2">{recipe.title}</h2>
+                  <h2 lang={textLang(recipe.title)} className="text-base sm:text-lg font-extrabold leading-snug text-ink line-clamp-2">{recipe.title}</h2>
                   <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-ink-muted">
                     {recipe.is_featured && <Badge variant="primary">Featured</Badge>}
                     <span>{recipe.category || 'No category'}</span>

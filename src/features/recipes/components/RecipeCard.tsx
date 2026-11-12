@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { textLang } from '@/lib/lang';
 import { useTranslation } from 'react-i18next';
 import type { Recipe } from '@/types';
 import { useFavorites } from '@/features/favorites/FavoritesContext';
@@ -38,7 +39,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
       </div>
 
       <div className="flex flex-col flex-1 p-3 sm:p-4">
-        <h3 className="text-base sm:text-lg font-extrabold leading-snug text-ink line-clamp-2">
+        <h3 lang={textLang(recipe.title)} className="text-base sm:text-lg font-extrabold leading-snug text-ink line-clamp-2">
           <Link
             to={`/recipes/${recipe.id}`}
             className="no-underline text-inherit outline-none after:absolute after:inset-0 after:rounded-[14px] focus-visible:after:outline-[3px] focus-visible:after:outline-focus focus-visible:after:-outline-offset-2"
@@ -48,7 +49,9 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
         </h3>
 
         {/* Short teaser: only where the card is wide enough for it to read well */}
-        <p className="hidden sm:block mt-1 text-sm leading-relaxed text-ink-muted line-clamp-2">{recipe.description}</p>
+        <p lang={textLang(recipe.description)} className="hidden sm:block mt-1 text-sm leading-relaxed text-ink-muted line-clamp-2">
+          {recipe.description}
+        </p>
 
         <RecipeMeta recipe={recipe} className="mt-auto pt-2.5" />
       </div>

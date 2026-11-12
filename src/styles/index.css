@@ -48,6 +48,8 @@
   --color-line-soft: #E8E5E0;
   --color-shadow: #2B2B3D;
   --color-focus: #6D55C4;
+  /* outline of the pixel-art pictures (components/ui/pixel-art) */
+  --color-sprite-ink: #2B2B3D;
 
   /* ── Fonts ── */
   --font-body: 'Nunito', 'Noto Sans Myanmar', system-ui, sans-serif;
@@ -89,6 +91,7 @@
   --color-line-soft: #3D3955;
   --color-shadow: #0B0B16;
   --color-focus: #C9BDF2;
+  --color-sprite-ink: #0B0B16;
 }
 
 /* ── Base ── */
@@ -370,4 +373,17 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Burmese stacks marks above and below its letters, so the tight line heights
+   that suit Latin headings make its lines collide. These rules sit outside the
+   layers on purpose: they must win over the type utilities for Burmese text,
+   whether the whole page is Burmese or just one recipe title (see lib/lang.ts). */
+:lang(my):is(h1, h2, h3, h4, .text-display, .text-title, .text-heading, .text-subheading),
+:lang(my) :is(h1, h2, h3, h4, .text-display, .text-title, .text-heading, .text-subheading) {
+  line-height: 1.55;
+}
+:lang(my):is(p, li, ul, ol),
+:lang(my) :is(p, li) {
+  line-height: 1.85;
 }

@@ -1,4 +1,5 @@
 import { CheckIcon } from '@/components/ui/icons';
+import { textLang } from '@/lib/lang';
 
 /*
  * Both lists are made of real checkboxes, hidden visually and drawn with CSS
@@ -13,7 +14,7 @@ const focusRing =
 /** Ingredients as a tick-off list: tap one when it is on the counter. */
 export function IngredientChecklist({ items }: { items: string[] }) {
   return (
-    <ul>
+    <ul lang={textLang(items.join(' '))}>
       {items.map((item, i) => (
         <li key={i}>
           <label className="flex items-start gap-3 py-2 cursor-pointer">
@@ -37,7 +38,7 @@ export function IngredientChecklist({ items }: { items: string[] }) {
 /** Numbered steps in large type, readable from a counter-top distance. Tap one to mark it done. */
 export function StepList({ steps }: { steps: string[] }) {
   return (
-    <ol className="space-y-1">
+    <ol lang={textLang(steps.join(' '))} className="space-y-1">
       {steps.map((step, i) => (
         <li key={i}>
           <label className="flex items-start gap-3 sm:gap-4 py-2 cursor-pointer">

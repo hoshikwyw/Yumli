@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { textLang } from '@/lib/lang';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useRecipeById, useRecipes } from '@/features/recipes/hooks/useRecipes';
@@ -101,8 +102,10 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
                   {t(`difficulty.${recipe.difficulty}`, { defaultValue: recipe.difficulty })}
                 </Badge>
               </div>
-              <h1 className="text-title text-ink mt-3 break-words">{recipe.title}</h1>
-              {recipe.description && <p className="text-lead text-ink-soft mt-2">{recipe.description}</p>}
+              <h1 lang={textLang(recipe.title)} className="text-title text-ink mt-3 break-words">{recipe.title}</h1>
+              {recipe.description && (
+                <p lang={textLang(recipe.description)} className="text-lead text-ink-soft mt-2">{recipe.description}</p>
+              )}
 
               <div className="mt-4 flex flex-wrap gap-3">
                 <Button
@@ -135,7 +138,7 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
             {recipe.ingredients?.length > 0 && (
               <Card variant="pastel-pink" className="p-4 sm:p-6">
                 <h2 className="text-heading text-ink">{t('recipeDetail.ingredients')}</h2>
-                <p className="text-sm text-ink-soft mt-0.5 mb-2">{t('recipeDetail.ingredientsHint')}</p>
+                <p className="text-sm text-ink-soft mt-1 mb-2">{t('recipeDetail.ingredientsHint')}</p>
                 <IngredientChecklist items={recipe.ingredients} />
               </Card>
             )}
@@ -143,7 +146,7 @@ function RecipeView({ recipe }: { recipe: Recipe }) {
             {recipe.instructions?.length > 0 && (
               <Card variant="pastel-mint" className="p-4 sm:p-6">
                 <h2 className="text-heading text-ink">{t('recipeDetail.instructions')}</h2>
-                <p className="text-sm text-ink-soft mt-0.5 mb-2">{t('recipeDetail.stepsHint')}</p>
+                <p className="text-sm text-ink-soft mt-1 mb-2">{t('recipeDetail.stepsHint')}</p>
                 <StepList steps={recipe.instructions} />
               </Card>
             )}

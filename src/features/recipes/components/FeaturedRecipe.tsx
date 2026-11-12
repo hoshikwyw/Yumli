@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { textLang } from '@/lib/lang';
 import type { Recipe } from '@/types';
 import { coverImage } from '@/features/recipes/utils';
 import { Button, Card, Container, Skeleton } from '@/components/ui';
@@ -27,8 +28,8 @@ export default function FeaturedRecipe({ recipe }: FeaturedRecipeProps) {
           {recipe ? (
             <div>
               <p className="text-eyebrow text-primary-ink">{t('home.featuredLabel')}</p>
-              <h2 className="text-heading text-ink mt-2">{recipe.title}</h2>
-              <p className="text-lead text-ink-soft mt-3 line-clamp-4">{recipe.description}</p>
+              <h2 lang={textLang(recipe.title)} className="text-heading text-ink mt-2">{recipe.title}</h2>
+              <p lang={textLang(recipe.description)} className="text-lead text-ink-soft mt-3 line-clamp-4">{recipe.description}</p>
               <RecipeMeta recipe={recipe} size="md" className="mt-4" />
               <Button to={`/recipes/${recipe.id}`} variant="primary" className="mt-6 w-full sm:w-auto">
                 {t('recipes.letsCook')}

@@ -50,11 +50,11 @@ export default function Home() {
           {/* Recipes to try */}
           <section className="bg-bg pixel-cross py-10 sm:py-14">
             <Container>
-              <div className="flex items-end justify-between gap-4 mb-5 sm:mb-8">
+              <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1 mb-5 sm:mb-8">
                 <h2 className="text-heading text-ink">{t('home.featuredRecipes')}</h2>
                 <Link
                   to="/recipes"
-                  className="shrink-0 inline-flex items-center gap-1 min-h-11 text-base font-extrabold text-primary-ink no-underline hover:underline underline-offset-4"
+                  className="inline-flex items-center gap-1 min-h-11 text-base font-extrabold text-primary-ink no-underline hover:underline underline-offset-4"
                 >
                   {t('home.seeAll')}
                   <ArrowRightIcon className="w-4 h-4" />

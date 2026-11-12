@@ -38,20 +38,21 @@ export default function AdminLayout() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
           <Link to="/admin" aria-label="Yumli admin" className="flex items-center gap-2 min-h-11 no-underline shrink-0">
             <Logo nameClassName="hidden sm:inline text-ink" />
-            <Badge variant="secondary">Admin</Badge>
+            <Badge variant="secondary" className="hidden min-[360px]:inline-flex">Admin</Badge>
           </Link>
 
+          {/* The theme switch is left out on phones to keep this row on one line; it is on every public page. */}
           <div className="flex items-center gap-1 sm:gap-2">
-            <Button to="/" variant="ghost" size="sm" className="px-3">View site</Button>
+            <Button to="/" variant="ghost" size="sm" className="px-2.5 whitespace-nowrap">View site</Button>
             <button
               type="button"
               onClick={toggleMode}
               aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-              className="inline-flex items-center justify-center w-11 h-11 text-ink hover:bg-surface-alt"
+              className="hidden sm:inline-flex items-center justify-center w-11 h-11 text-ink hover:bg-surface-alt"
             >
               {isDark ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
             </button>
-            <Button variant="outline" size="sm" onClick={handleLogout}>Log out</Button>
+            <Button variant="outline" size="sm" onClick={handleLogout} className="px-3 whitespace-nowrap">Log out</Button>
           </div>
         </div>
       </header>

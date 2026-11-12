@@ -18,7 +18,11 @@ function toRuns(rows: readonly string[]): Run[] {
       const pixel = row[x];
       let end = x + 1;
       while (end < row.length && row[end] === pixel) end++;
-      if (pixel !== '.') runs.push({ x, y, width: end - x, fill: PALETTE[pixel as keyof typeof PALETTE] });
+      if (pixel !== '.') {
+        // The outline follows the theme, so pictures keep their edge on dark backgrounds.
+        const fill = pixel === 'K' ? 'var(--color-sprite-ink)' : PALETTE[pixel as keyof typeof PALETTE];
+        runs.push({ x, y, width: end - x, fill });
+      }
       x = end;
     }
   });
@@ -48,7 +52,7 @@ export default function PixelArt({ name, className = 'w-8 h-8', label }: PixelAr
       className={`shrink-0 ${className}`}
     >
       {runsFor(name).map((run) => (
-        <rect key={`${run.x}-${run.y}`} x={run.x} y={run.y} width={run.width} height={1} fill={run.fill} />
+        <rect key={`${run.x}-${run.y}`} x={run.x} y={run.y} width={run.width} height={1} style={{ fill: run.fill }} />
       ))}
     </svg>
   );

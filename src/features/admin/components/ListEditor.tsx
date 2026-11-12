@@ -47,12 +47,13 @@ export default function ListEditor({ title, tone, items, onChange, placeholder, 
             {multiline ? (
               <textarea
                 value={item}
-                rows={2}
+                rows={3}
                 autoFocus={focusIndex === i}
                 aria-label={`${title} ${i + 1}`}
                 placeholder={placeholder(i)}
                 onChange={(e) => update(i, e.target.value)}
-                className={`${fieldClasses} flex-1 resize-y`}
+                // field-sizing lets the box grow as you type; browsers without it show three rows and a resize handle.
+                className={`${fieldClasses} flex-1 resize-y [field-sizing:content]`}
               />
             ) : (
               <input

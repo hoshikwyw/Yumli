@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { errorMessage } from './errors';
+import { textLang } from './lang';
 import { getYouTubeId } from './youtube';
 
 describe('getYouTubeId', () => {
@@ -28,5 +29,18 @@ describe('errorMessage', () => {
     expect(errorMessage('Boom', 'Fallback')).toBe('Fallback');
     expect(errorMessage(new Error(''), 'Fallback')).toBe('Fallback');
     expect(errorMessage(null)).toBe('Something went wrong');
+  });
+});
+
+describe('textLang', () => {
+  it('marks Burmese text', () => {
+    expect(textLang('ကြက်ဥမွှေကြော်')).toBe('my');
+    expect(textLang('Egg ကြော်')).toBe('my');
+  });
+
+  it('leaves everything else to the page language', () => {
+    expect(textLang('Fried egg')).toBeUndefined();
+    expect(textLang('')).toBeUndefined();
+    expect(textLang(null)).toBeUndefined();
   });
 });

@@ -8,19 +8,18 @@ import { useLocation, useNavigationType } from 'react-router-dom';
  * was clicked, in a page that no longer exists).
  *
  * Going back or forward is left alone, so the browser can return people to
- * where they were in a list.
+ * where they were in a list. So is a change that keeps the same page, such as
+ * the recipe filters rewriting the query string: taking focus then would pull
+ * the cursor out of the search box mid-word.
  */
 export default function ScrollToTop() {
   const { pathname } = useLocation();
   const navigationType = useNavigationType();
-  const isFirstPage = useRef(true);
+  const shownPath = useRef(pathname);
 
   useEffect(() => {
-    // The first page is a real page load: the browser has already handled it.
-    if (isFirstPage.current) {
-      isFirstPage.current = false;
-      return;
-    }
+    if (shownPath.current === pathname) return;
+    shownPath.current = pathname;
     if (navigationType === 'POP') return;
     window.scrollTo(0, 0);
     document.getElementById('main')?.focus({ preventScroll: true });
