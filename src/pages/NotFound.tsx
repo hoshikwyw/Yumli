@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { Container, Button } from '../components/common';
 
 export default function NotFound() {
   const { t } = useTranslation();
+  useDocumentTitle(t('notFound.title'));
 
   return (
     <div className="bg-bg pixel-hearts min-h-[70vh] flex items-center justify-center py-12">

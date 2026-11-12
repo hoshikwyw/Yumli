@@ -8,6 +8,7 @@ import { CloseIcon, HeartIcon, SearchIcon } from '../components/icons';
 import RecipeGrid from '../components/RecipeGrid';
 import { fieldClasses } from '../components/common/Input';
 import { categoryEmoji, isQuick } from '../utils/recipe';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import type { Recipe } from '../types';
 
 /** Everything a visitor might type to find a recipe, in one lowercase string. */
@@ -25,6 +26,7 @@ export default function Recipes() {
   const { favorites, isFavorite } = useFavorites();
   const { t } = useTranslation();
   const categoryLabel = useCategoryLabel();
+  useDocumentTitle(t('recipes.title'));
 
   const query = searchParams.get('q') ?? '';
   const category = searchParams.get('category');

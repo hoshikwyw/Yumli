@@ -8,6 +8,7 @@ import { Button, Container, Skeleton, StateMessage } from '../components/common'
 import { useRecipes } from '../hooks/useRecipes';
 import { useCategoryLabel } from '../hooks/useCategoryLabel';
 import { categoryEmoji, isQuick } from '../utils/recipe';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import type { Recipe } from '../types';
 
 /** How many recipes the home page shows before sending people to the full list. */
@@ -57,6 +58,7 @@ export default function Home() {
   const { recipes, loading, error, reload } = useRecipes();
   const { t } = useTranslation();
   const categoryLabel = useCategoryLabel();
+  useDocumentTitle();
 
   const featured = recipes.filter((r) => r.is_featured);
   const pool = featured.length > 0 ? featured : recipes;

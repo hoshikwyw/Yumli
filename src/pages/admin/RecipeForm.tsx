@@ -7,6 +7,7 @@ import { fonts } from '../../themes/font';
 import { Container, Card, Button, Input, Textarea, Select } from '../../components/common';
 import * as recipeService from '../../services/recipeService';
 import type { RecipeInput } from '../../services/recipeService';
+import { getYouTubeId, youTubeEmbedUrl } from '../../utils/youtube';
 
 const MAX_IMAGES = 3;
 
@@ -324,7 +325,7 @@ export default function RecipeForm() {
             {form.youtube_link && getYouTubeId(form.youtube_link) && (
               <div className="mt-3 rounded-lg overflow-hidden" style={{ border: `2px solid ${colors.gray200}` }}>
                 <iframe
-                  src={`https://www.youtube.com/embed/${getYouTubeId(form.youtube_link)}`}
+                  src={youTubeEmbedUrl(getYouTubeId(form.youtube_link)!)}
                   className="w-full h-40 sm:h-52"
                   allowFullScreen
                   title="Video preview"
@@ -480,17 +481,4 @@ export default function RecipeForm() {
       </Container>
     </div>
   );
-}
-
-// Extract YouTube video ID from various URL formats
-function getYouTubeId(url: string): string | null {
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
-    /^([a-zA-Z0-9_-]{11})$/,
-  ];
-  for (const p of patterns) {
-    const match = url.match(p);
-    if (match) return match[1];
-  }
-  return null;
 }

@@ -110,3 +110,25 @@ export const CloseIcon = (props: IconProps) => (
     <path d="M6 6l12 12M18 6L6 18" />
   </Icon>
 );
+
+export const ArrowLeftIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M19 12H5" />
+    <path d="M11 6l-6 6 6 6" />
+  </Icon>
+);
+
+export const CheckIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M5 12.5l4.5 4.5L19 7.5" />
+  </Icon>
+);
+
+export const ShareIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <circle cx="18" cy="5" r="2.5" />
+    <circle cx="6" cy="12" r="2.5" />
+    <circle cx="18" cy="19" r="2.5" />
+    <path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4" />
+  </Icon>
+);

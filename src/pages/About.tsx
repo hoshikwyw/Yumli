@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageHeader, Container, Card } from '../components/common';
 
 const features = [
@@ -9,6 +10,7 @@ const features = [
 
 export default function About() {
   const { t } = useTranslation();
+  useDocumentTitle(t('about.title'));
 
   return (
     <div className="bg-bg">

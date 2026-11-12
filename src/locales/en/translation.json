@@ -56,15 +56,24 @@
     "savedEmptyText": "Tap the heart on any recipe to keep it here."
   },
   "recipeDetail": {
-    "notFound": "OOPS!",
+    "notFound": "Recipe not found",
     "notFoundHint": "This recipe wandered off somewhere... let's find you something else!",
-    "backToRecipes": "BACK TO RECIPES",
+    "backToRecipes": "Back to recipes",
     "ingredients": "Shopping List",
     "instructions": "Let's Make It",
-    "prep": "PREP",
-    "cook": "COOK",
-    "serves": "SERVES",
-    "moreIn": "More {{category}}"
+    "prep": "Prep",
+    "cook": "Cook",
+    "serves": "Serves",
+    "moreIn": "More {{category}}",
+    "back": "All recipes",
+    "difficulty": "Level",
+    "ingredientsHint": "Tap an ingredient when you have it ready.",
+    "stepsHint": "Tap a step when it's done.",
+    "photo": "Photo {{number}} of {{total}}",
+    "video": "Recipe video",
+    "share": "Share",
+    "linkCopied": "Link copied",
+    "save": "Save"
   },
   "about": {
     "title": "About",
@@ -133,5 +142,10 @@
     "serves": "Serves",
     "save": "Save {{title}}",
     "unsave": "Remove {{title}} from saved"
+  },
+  "difficulty": {
+    "Easy": "Easy",
+    "Medium": "Medium",
+    "Hard": "Hard"
   }
 }
