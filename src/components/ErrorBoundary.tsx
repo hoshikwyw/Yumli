@@ -1,6 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import i18n from '@/i18n';
-import { Button } from '@/components/ui';
+import { Button, PixelArt } from '@/components/ui';
 
 interface Props {
   children: ReactNode;
@@ -33,7 +33,7 @@ export default class ErrorBoundary extends Component<Props, State> {
     return (
       <div role="alert" className="bg-bg min-h-dvh flex items-center justify-center p-4">
         <div className="text-center max-w-md">
-          <div className="text-6xl" aria-hidden="true">😵</div>
+          <PixelArt name="sad" className="w-16 h-16 mx-auto" />
           <h1 className="text-title text-ink mt-4">{i18n.t('error.title')}</h1>
           <p className="text-lead text-ink-soft mt-3">{i18n.t('error.text')}</p>
           {/* The technical message helps while developing; visitors do not need it. */}

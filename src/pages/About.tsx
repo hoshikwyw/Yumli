@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { PageHeader, Container, Card } from '@/components/ui';
+import { PageHeader, Container, Card, PixelArt } from '@/components/ui';
 
 const features = [
-  { emoji: '🍽️', titleKey: 'about.feature1Title', descKey: 'about.feature1Desc', variant: 'pastel-pink' },
-  { emoji: '👌', titleKey: 'about.feature2Title', descKey: 'about.feature2Desc', variant: 'pastel-lavender' },
-  { emoji: '💖', titleKey: 'about.feature3Title', descKey: 'about.feature3Desc', variant: 'pastel-mint' },
+  { icon: 'plate', titleKey: 'about.feature1Title', descKey: 'about.feature1Desc', variant: 'pastel-pink' },
+  { icon: 'star', titleKey: 'about.feature2Title', descKey: 'about.feature2Desc', variant: 'pastel-lavender' },
+  { icon: 'heart', titleKey: 'about.feature3Title', descKey: 'about.feature3Desc', variant: 'pastel-mint' },
 ] as const;
 
 export default function About() {
@@ -43,7 +43,7 @@ export default function About() {
             {features.map((feature) => (
               <li key={feature.titleKey}>
                 <Card variant={feature.variant} className="h-full p-5 sm:p-6 text-center">
-                  <div className="text-4xl" aria-hidden="true">{feature.emoji}</div>
+                  <PixelArt name={feature.icon} className="w-12 h-12 mx-auto" />
                   <h3 className="text-subheading text-ink mt-3">{t(feature.titleKey)}</h3>
                   <p className="text-base text-ink-soft mt-1">{t(feature.descKey)}</p>
                 </Card>

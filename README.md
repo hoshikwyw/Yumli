@@ -122,7 +122,8 @@ src/                # imports use the "@/" alias, e.g. "@/components/ui"
     theme/          # ThemeContext (useTheme), ThemeProvider
   components/       # shared by every feature
     ui/             # Button, Card, Badge, Chip, Input, Select, Skeleton, StateMessage,
-                    #   PageHeader, Container, BackLink, icons
+                    #   PageHeader, Container, BackLink, Logo, icons
+    ui/pixel-art/   # every food picture, category icon and sticker (sprites.ts), drawn by <PixelArt>
     layout/         # Header, BottomNav, Footer, PublicLayout, AdminLayout
     ErrorBoundary.tsx
   hooks/            # useDocumentTitle

@@ -1,7 +1,7 @@
 /**
  * Draws Yumli's logo mark (a pixel-art fried egg) and writes every icon file
  * the site needs into public/. The drawing below is the single source: edit
- * it, run `npm run icons`, and the favicon, the phone icons and the logo in
+ * it (src/components/ui/pixel-art/sprites.ts), run `npm run icons`, and the favicon, the phone icons and the logo in
  * the header all change together.
  *
  * No image library is needed: the art is a 16x16 grid, so each icon is that
@@ -10,38 +10,20 @@
 import { writeFileSync } from 'node:fs';
 import { deflateSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
+// Node runs this TypeScript file directly (Node 22.18 or newer).
+import { PALETTE, SPRITES } from '../src/components/ui/pixel-art/sprites.ts';
 
 const publicDir = fileURLToPath(new URL('../public/', import.meta.url));
 
 // ── The drawing ──
-// One character per pixel. '.' is background; the letters are named below.
-const ART = [
-  '................',
-  '................',
-  '.....KKKKK......',
-  '...KKWWWWWKK....',
-  '..KWWWWWWWWWKK..',
-  '.KWWWWYHYYWWWWK.',
-  '.KWWWYYYYYYWWWK.',
-  '.KWWWYKYYKYWWWK.',
-  '.KWWWYYKKYYWWWK.',
-  '.KWWWYYYYYOWWWK.',
-  '..KWWWOOOOWWWK..',
-  '..KWWWWWWWWWK...',
-  '...KKWWWWWKK....',
-  '.....KKKKK......',
-  '................',
-  '................',
-];
+// The egg and its colours live with the rest of the app's pixel art. In a
+// sprite '.' means see-through; for the icons it becomes the coral background.
+const ART = SPRITES.egg;
 
 const COLORS = {
+  ...PALETTE,
   '.': '#FF7B7B', // background: brand coral
-  S: '#E85D5D', // stepped shadow under the egg, like the site's pixel shadows
-  K: '#2B2B3D', // ink outline
-  W: '#FFFFFF', // egg white
-  Y: '#FFC94D', // yolk
-  H: '#FFF1B8', // yolk highlight
-  O: '#F5A623', // yolk shade
+  '#': '#E85D5D', // stepped shadow under the egg, like the site's pixel shadows
 };
 
 const SIZE = ART.length;
@@ -51,7 +33,7 @@ if (ART.some((row) => row.length !== SIZE)) throw new Error('The drawing must be
 const grid = ART.map((row, y) =>
   [...row].map((pixel, x) => {
     const upLeft = ART[y - 1]?.[x - 1];
-    return pixel === '.' && upLeft && upLeft !== '.' ? 'S' : pixel;
+    return pixel === '.' && upLeft && upLeft !== '.' ? '#' : pixel;
   }));
 
 /** Corner pixels left transparent, so the small icons read as a rounded tile. */

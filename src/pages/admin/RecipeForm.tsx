@@ -219,7 +219,7 @@ export default function RecipeForm() {
       <Container size="md">
         <StateMessage
           alert={loadState === 'failed'}
-          emoji={loadState === 'missing' ? '🔍' : '😕'}
+          icon={loadState === 'missing' ? 'search' : 'sad'}
           title={loadState === 'missing' ? 'This recipe no longer exists' : 'Could not load this recipe'}
           action={<Button to="/admin" variant="primary">Back to dashboard</Button>}
         />

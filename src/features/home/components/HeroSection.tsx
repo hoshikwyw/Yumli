@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import { Button, Container } from '@/components/ui';
+import { Button, Container, PixelArt, type SpriteName } from '@/components/ui';
 import { ArrowRightIcon } from '@/components/ui/icons';
 
 /* Decorative food pictures: a tidy row of three on phones, an overlapping collage from tablet up. */
-const tiles = [
-  { src: '/stew.png', position: 'md:top-0 md:right-0 md:w-44 md:h-44 lg:w-64 lg:h-64' },
-  { src: '/fish.png', position: 'md:bottom-0 md:left-[18%] md:w-36 md:h-36 lg:w-52 lg:h-52' },
-  { src: '/noodle.png', position: 'md:top-6 md:left-[6%] md:w-20 md:h-20 lg:w-28 lg:h-28' },
+const tiles: { icon: SpriteName; tone: string; position: string }[] = [
+  { icon: 'pot', tone: 'bg-warm-soft', position: 'md:top-0 md:right-0 md:w-44 md:h-44 lg:w-64 lg:h-64' },
+  { icon: 'fish', tone: 'bg-accent-soft', position: 'md:bottom-0 md:left-[18%] md:w-36 md:h-36 lg:w-52 lg:h-52' },
+  { icon: 'noodles', tone: 'bg-secondary-soft', position: 'md:top-6 md:left-[6%] md:w-20 md:h-20 lg:w-28 lg:h-28' },
 ];
 
 /**
@@ -43,17 +43,14 @@ export default function HeroSection() {
           >
             {tiles.map((tile) => (
               <div
-                key={tile.src}
-                className={`aspect-square md:aspect-auto md:absolute bg-surface pixel-box overflow-hidden ${tile.position}`}
+                key={tile.icon}
+                className={`relative aspect-square md:aspect-auto md:absolute pixel-box ${tile.tone} ${tile.position}`}
               >
-                <img src={tile.src} alt="" className="w-full h-full object-cover" />
+                {/* Inset, not padding: percentage padding would be measured against the whole collage */}
+                <PixelArt name={tile.icon} className="absolute inset-[10%] w-[80%] h-[80%]" />
               </div>
             ))}
-            <img
-              src="/bread.png"
-              alt=""
-              className="hidden md:block absolute bottom-8 right-[12%] w-12 h-12 object-cover animate-float"
-            />
+            <PixelArt name="toast" className="hidden md:block absolute bottom-8 right-[12%] w-12 h-12 animate-float" />
           </div>
         </div>
       </Container>

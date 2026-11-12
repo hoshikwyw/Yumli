@@ -105,7 +105,7 @@ export default function CategoryManager({ categories, recipes, onChanged, onErro
       </Card>
 
       {categories.length === 0 ? (
-        <StateMessage emoji="🏷️" title="No categories yet" text="Add one above, then choose it when you write a recipe." />
+        <StateMessage icon="plate" title="No categories yet" text="Add one above, then choose it when you write a recipe." />
       ) : (
         <ul className="space-y-3">
           {categories.map((category) => {

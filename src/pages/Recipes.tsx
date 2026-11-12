@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { useRecipes } from '@/features/recipes/hooks/useRecipes';
 import { useCategoryLabel } from '@/features/recipes/hooks/useCategoryLabel';
 import { useFavorites } from '@/features/favorites/FavoritesContext';
-import { PageHeader, Container, Button, Chip, StateMessage, fieldClasses } from '@/components/ui';
+import { PageHeader, Container, Button, Chip, StateMessage, fieldClasses, PixelArt } from '@/components/ui';
 import LoadError from '@/features/recipes/components/LoadError';
 import { CloseIcon, HeartIcon, SearchIcon } from '@/components/ui/icons';
 import RecipeGrid from '@/features/recipes/components/RecipeGrid';
-import { categoryEmoji, filterRecipes } from '@/features/recipes/utils';
+import { categoryIcon, filterRecipes } from '@/features/recipes/utils';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 /**
@@ -100,13 +100,13 @@ export default function Recipes() {
             </Chip>
             {categories.map(([name, slug]) => (
               <Chip key={name} selected={category === name} onClick={() => setFilters({ category: name })}>
-                <span aria-hidden="true">{categoryEmoji(slug)}</span>
+                <PixelArt name={categoryIcon(slug)} className="w-6 h-6" />
                 {categoryLabel(slug, name)}
               </Chip>
             ))}
             <span aria-hidden="true" className="shrink-0 w-px my-1.5 bg-line-soft" />
             <Chip selected={quickOnly} onClick={() => setFilters({ quick: quickOnly ? null : '1' })}>
-              <span aria-hidden="true">⚡</span>
+              <PixelArt name="bolt" className="w-6 h-6" />
               {t('home.pickQuick')}
             </Chip>
             <Chip selected={savedOnly} onClick={() => setFilters({ saved: savedOnly ? null : '1' })}>
@@ -127,7 +127,7 @@ export default function Recipes() {
             <RecipeGrid recipes={[]} loading />
           ) : nothingSaved ? (
             <StateMessage
-              emoji="💗"
+              icon="heart"
               title={t('recipes.savedEmptyTitle')}
               text={t('recipes.savedEmptyText')}
               action={<Button variant="primary" onClick={clearFilters}>{t('common.browseRecipes')}</Button>}
@@ -137,7 +137,7 @@ export default function Recipes() {
               <StateMessage title={t('home.emptyTitle')} text={t('home.emptyText')} />
             ) : (
               <StateMessage
-                emoji="🔍"
+                icon="search"
                 title={t('recipes.noResults')}
                 text={t('recipes.noResultsHint')}
                 action={<Button variant="primary" onClick={clearFilters}>{t('recipes.clearFilters')}</Button>}

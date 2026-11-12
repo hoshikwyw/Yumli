@@ -8,7 +8,7 @@ export default function LoadError({ onRetry }: { onRetry: () => void }) {
   return (
     <StateMessage
       alert
-      emoji="😕"
+      icon="sad"
       title={t('common.loadError')}
       action={<Button variant="primary" onClick={onRetry}>{t('common.retry')}</Button>}
     />

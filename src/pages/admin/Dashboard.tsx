@@ -102,7 +102,7 @@ export default function Dashboard() {
         {loadError ? (
           <StateMessage
             alert
-            emoji="😕"
+            icon="sad"
             title={loadError}
             action={<Button variant="primary" onClick={retry}>Try again</Button>}
           />

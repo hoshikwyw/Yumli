@@ -6,7 +6,7 @@ import FeaturedRecipe from '@/features/recipes/components/FeaturedRecipe';
 import RecipeGrid from '@/features/recipes/components/RecipeGrid';
 import LoadError from '@/features/recipes/components/LoadError';
 import { useRecipes } from '@/features/recipes/hooks/useRecipes';
-import { Button, Container, StateMessage } from '@/components/ui';
+import { Button, Container, PixelArt, StateMessage } from '@/components/ui';
 import { ArrowRightIcon } from '@/components/ui/icons';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
@@ -72,7 +72,7 @@ export default function Home() {
       <section className="bg-bg pixel-hearts py-12 sm:py-16">
         <Container>
           <div className="text-center max-w-lg mx-auto">
-            <div className="text-4xl animate-heartbeat inline-block" aria-hidden="true">💖</div>
+            <PixelArt name="heart" className="w-12 h-12 mx-auto animate-heartbeat" />
             <h2 className="text-heading text-ink mt-3">{t('common.unlockChef')}</h2>
             <p className="text-lead text-ink-soft mt-2">{t('home.soloSubtitle')}</p>
             <Button to="/recipes" variant="primary" size="lg" className="mt-6 w-full sm:w-auto">

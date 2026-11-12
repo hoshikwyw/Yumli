@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { BackLink, Card, Button, Input } from '@/components/ui';
+import { BackLink, Card, Button, Input, PixelArt } from '@/components/ui';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -38,7 +38,7 @@ export default function Login() {
     <div className="min-h-dvh bg-bg pixel-hearts flex flex-col items-center justify-center p-4">
       <Card variant="default" className="w-full max-w-sm p-6 sm:p-8">
         <div className="text-center mb-6">
-          <span className="text-4xl" aria-hidden="true">🔒</span>
+          <PixelArt name="lock" className="w-12 h-12 mx-auto" />
           <h1 className="text-heading text-ink mt-2">Secret Kitchen</h1>
           <p className="text-base text-ink-muted">Admin access only</p>
         </div>

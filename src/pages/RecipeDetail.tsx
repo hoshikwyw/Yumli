@@ -37,7 +37,7 @@ export default function RecipeDetail() {
     return (
       <Container>
         <StateMessage
-          emoji="🔍"
+          icon="search"
           title={t('recipeDetail.notFound')}
           text={t('recipeDetail.notFoundHint')}
           action={<Button to="/recipes" variant="primary">{t('recipeDetail.backToRecipes')}</Button>}

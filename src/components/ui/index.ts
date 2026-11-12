@@ -10,3 +10,5 @@ export { default as StateMessage } from './StateMessage';
 export { default as Chip } from './Chip';
 export { default as BackLink } from './BackLink';
 export { default as Logo } from './Logo';
+export { default as PixelArt } from './pixel-art/PixelArt';
+export type { SpriteName } from './pixel-art/sprites';

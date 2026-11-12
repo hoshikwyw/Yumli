@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Container, Skeleton } from '@/components/ui';
+import { Container, PixelArt, Skeleton, type SpriteName } from '@/components/ui';
 import { useCategoryLabel } from '@/features/recipes/hooks/useCategoryLabel';
-import { categoryEmoji, isQuick } from '@/features/recipes/utils';
+import { categoryIcon, isQuick } from '@/features/recipes/utils';
 import type { Recipe } from '@/types';
 
 /* Tile colours, used in rotation. */
@@ -18,7 +18,7 @@ const TILE_SIZE = 'w-[calc(50%-0.375rem)] sm:w-48';
 
 interface Pick {
   key: string;
-  emoji: string;
+  icon: SpriteName;
   label: string;
   count: number;
   /** The recipe list, filtered to this pick. */
@@ -47,7 +47,7 @@ export default function CategoryPicks({ recipes, loading }: CategoryPicksProps) 
     else {
       byCategory.set(recipe.category, {
         key: recipe.category,
-        emoji: categoryEmoji(recipe.category_slug),
+        icon: categoryIcon(recipe.category_slug),
         label: categoryLabel(recipe.category_slug, recipe.category),
         count: 1,
         to: `/recipes?category=${encodeURIComponent(recipe.category)}`,
@@ -58,7 +58,7 @@ export default function CategoryPicks({ recipes, loading }: CategoryPicksProps) 
   const quickCount = recipes.filter(isQuick).length;
   const picks: Pick[] = [
     ...(quickCount > 0
-      ? [{ key: 'quick', emoji: '⚡', label: t('home.pickQuick'), count: quickCount, to: '/recipes?quick=1' }]
+      ? [{ key: 'quick', icon: 'bolt' as const, label: t('home.pickQuick'), count: quickCount, to: '/recipes?quick=1' }]
       : []),
     ...[...byCategory.values()].sort((a, b) => b.count - a.count),
   ];
@@ -81,9 +81,9 @@ export default function CategoryPicks({ recipes, loading }: CategoryPicksProps) 
                 <li key={pick.key} className={TILE_SIZE}>
                   <Link
                     to={pick.to}
-                    className={`flex flex-col items-center justify-center h-full min-h-[124px] p-3 text-center no-underline pixel-press ${TILE_TONES[i % TILE_TONES.length]}`}
+                    className={`flex flex-col items-center justify-center h-full min-h-[136px] p-3 text-center no-underline pixel-press ${TILE_TONES[i % TILE_TONES.length]}`}
                   >
-                    <span className="text-3xl" aria-hidden="true">{pick.emoji}</span>
+                    <PixelArt name={pick.icon} className="w-12 h-12" />
                     <span className="mt-1.5 text-base font-extrabold leading-snug text-ink">{pick.label}</span>
                     <span className="text-sm text-ink-soft">{t('home.recipeCount', { count: pick.count })}</span>
                   </Link>

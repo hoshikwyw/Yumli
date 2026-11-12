@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { PixelArt } from '@/components/ui';
 
 interface RecipeImageProps {
   src: string | undefined;
@@ -23,9 +24,9 @@ export default function RecipeImage({ src, alt = '', className = '', eager = fal
         role={alt ? 'img' : undefined}
         aria-label={alt || undefined}
         aria-hidden={alt ? undefined : true}
-        className={`absolute inset-0 w-full h-full flex items-center justify-center bg-surface-alt text-4xl ${className}`}
+        className={`absolute inset-0 w-full h-full flex items-center justify-center bg-surface-alt ${className}`}
       >
-        🍽️
+        <PixelArt name="plate" className="w-1/3 max-w-16 h-auto aspect-square" />
       </div>
     );
   }

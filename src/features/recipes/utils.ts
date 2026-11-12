@@ -1,3 +1,4 @@
+import type { SpriteName } from '@/components/ui';
 import type { Recipe } from '@/types';
 
 /** Recipes at or under this many minutes of prep count as "quick". */
@@ -32,17 +33,17 @@ export const isQuick = (recipe: Recipe) => {
 /** The picture to show for a recipe in lists: the first gallery image, else the legacy single image. */
 export const coverImage = (recipe: Recipe) => recipe.images?.[0] ?? recipe.image;
 
-/** Emoji shown beside a category, by slug. Categories added later in the admin get the plate. */
-const CATEGORY_EMOJI: Record<string, string> = {
-  breakfast: '🍳',
-  'main-course': '🍛',
-  dessert: '🍰',
-  salad: '🥗',
-  soup: '🍲',
-  snack: '🍿',
+/** Pixel-art picture shown beside a category, by slug. Categories added later in the admin get the plate. */
+const CATEGORY_ICONS: Record<string, SpriteName> = {
+  breakfast: 'egg',
+  'main-course': 'pot',
+  dessert: 'cake',
+  salad: 'salad',
+  soup: 'soup',
+  snack: 'cookie',
 };
 
-export const categoryEmoji = (slug: string) => CATEGORY_EMOJI[slug] ?? '🍽️';
+export const categoryIcon = (slug: string): SpriteName => CATEGORY_ICONS[slug] ?? 'plate';
 
 export interface RecipeFilters {
   /** Free text, matched against title, description, category and ingredients. */
