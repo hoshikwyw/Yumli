@@ -3,9 +3,8 @@ import { ThemeProvider } from './context/ThemeContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { AuthProvider } from './context/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
-import Navbar from './components/Navbar';
-import PageTransition from './components/PageTransition';
-import { Footer } from './components/common';
+import PublicLayout from './components/layout/PublicLayout';
+import ScrollToTop from './components/layout/ScrollToTop';
 import Home from './pages/Home';
 import Recipes from './pages/Recipes';
 import RecipeDetail from './pages/RecipeDetail';
@@ -22,31 +21,22 @@ function App() {
         <FavoritesProvider>
           <AuthProvider>
             <Router>
+              <ScrollToTop />
               <Routes>
-                {/* Admin routes — no Navbar/Footer */}
+                {/* Admin: its own screens, without the public header and footer */}
                 <Route path="/admin/login" element={<Login />} />
                 <Route path="/admin" element={<Dashboard />} />
                 <Route path="/admin/new" element={<RecipeForm />} />
                 <Route path="/admin/edit/:id" element={<RecipeForm />} />
 
-                {/* Public routes */}
-                <Route path="*" element={
-                  <div className="min-h-screen flex flex-col">
-                    <Navbar />
-                    <main className="flex-1">
-                      <PageTransition>
-                        <Routes>
-                          <Route path="/" element={<Home />} />
-                          <Route path="/recipes" element={<Recipes />} />
-                          <Route path="/recipes/:id" element={<RecipeDetail />} />
-                          <Route path="/about" element={<About />} />
-                          <Route path="*" element={<NotFound />} />
-                        </Routes>
-                      </PageTransition>
-                    </main>
-                    <Footer />
-                  </div>
-                } />
+                {/* Public pages share one layout */}
+                <Route element={<PublicLayout />}>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/recipes" element={<Recipes />} />
+                  <Route path="/recipes/:id" element={<RecipeDetail />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
               </Routes>
             </Router>
           </AuthProvider>

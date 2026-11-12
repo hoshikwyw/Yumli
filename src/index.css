@@ -391,7 +391,7 @@
 
 /* Page transition */
 .page-enter {
-  animation: slide-up 0.35s ease-out forwards;
+  animation: slide-up 0.35s ease-out backwards;
 }
 
 /* Heart favorite pop */

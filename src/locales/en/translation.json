@@ -1,11 +1,14 @@
 {
   "nav": {
-    "home": "HOME",
-    "recipes": "RECIPES",
-    "about": "ABOUT",
-    "contact": "CONTACT",
-    "menu": "MENU",
-    "close": "CLOSE"
+    "home": "Home",
+    "recipes": "Recipes",
+    "about": "About",
+    "main": "Main navigation",
+    "skip": "Skip to content",
+    "language": "Change language",
+    "darkMode": "Switch to dark mode",
+    "lightMode": "Switch to light mode",
+    "admin": "Admin"
   },
   "hero": {
     "tagline": "YOUR COZY KITCHEN COMPANION",
@@ -92,12 +95,23 @@
   "footer": {
     "tagline": "Cooking for yourself is an act of love.\nYour cozy kitchen companion.",
     "navigate": "EXPLORE",
-    "followUs": "FOLLOW US",
     "rights": "Yumli. Made with love.",
-    "madeWith": "MADE WITH <3 AND PIXELS"
+    "madeWith": "Made with \u2665 and pixels"
   },
   "common": {
     "browseRecipes": "EXPLORE RECIPES",
     "unlockChef": "You're already a great chef!"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "text": "Oops! This page must have wandered off to the kitchen. Let's get you back to somewhere delicious.",
+    "home": "Go home",
+    "recipes": "Browse recipes"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "text": "The kitchen had a little accident. Don't worry, nothing's burned!",
+    "retry": "Try again",
+    "home": "Back to home"
   }
 }

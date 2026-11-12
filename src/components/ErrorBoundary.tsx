@@ -1,84 +1,55 @@
-import { Component, type ReactNode } from 'react';
+import { Component, type ErrorInfo, type ReactNode } from 'react';
+import i18n from '../i18n';
+import { Button } from './common';
 
 interface Props {
   children: ReactNode;
 }
 
 interface State {
-  hasError: boolean;
   error: Error | null;
 }
 
+/**
+ * Last line of defence: if a page crashes while rendering, show a friendly
+ * screen with a way out instead of a blank page. It sits above the router and
+ * the providers, so it uses plain links and reads translations directly.
+ */
 export default class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
+  state: State = { error: null };
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { error };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('Yumli crashed while rendering:', error, info.componentStack);
   }
 
   render() {
-    if (this.state.hasError) {
-      return (
-        <div
-          style={{ backgroundColor: '#FFF9F5', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
-        >
-          <div style={{ textAlign: 'center', maxWidth: '400px' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>😵</div>
-            <h1
-              style={{
-                fontFamily: "'Press Start 2P', monospace",
-                fontSize: '14px',
-                color: '#2B2B3D',
-                marginBottom: '12px',
-              }}
-            >
-              Something Went Wrong
-            </h1>
-            <p
-              style={{
-                fontFamily: "'Nunito', sans-serif",
-                fontSize: '14px',
-                color: '#A8A29E',
-                lineHeight: '1.7',
-                marginBottom: '8px',
-              }}
-            >
-              The kitchen had a little accident. Don't worry, nothing's burned!
-            </p>
-            <p
-              style={{
-                fontFamily: "'Nunito', sans-serif",
-                fontSize: '12px',
-                color: '#D1CCC4',
-                marginBottom: '24px',
-                wordBreak: 'break-word',
-              }}
-            >
-              {this.state.error?.message}
-            </p>
-            <button
-              onClick={() => window.location.assign('/')}
-              style={{
-                fontFamily: "'Press Start 2P', monospace",
-                fontSize: '10px',
-                backgroundColor: '#FF7B7B',
-                color: '#FFFFFF',
-                border: '3px solid #2B2B3D',
-                boxShadow: '4px 4px 0px #2B2B3D',
-                padding: '12px 24px',
-                cursor: 'pointer',
-              }}
-            >
-              BACK TO HOME
-            </button>
+    const { error } = this.state;
+    if (!error) return this.props.children;
+
+    return (
+      <div role="alert" className="bg-bg min-h-dvh flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="text-6xl" aria-hidden="true">😵</div>
+          <h1 className="text-title text-ink mt-4">{i18n.t('error.title')}</h1>
+          <p className="text-lead text-ink-soft mt-3">{i18n.t('error.text')}</p>
+          {/* The technical message helps while developing; visitors do not need it. */}
+          {import.meta.env.DEV && (
+            <p className="mt-3 text-sm text-ink-muted break-words">{error.message}</p>
+          )}
+          <div className="flex flex-col sm:flex-row gap-3 sm:justify-center mt-7">
+            <Button variant="primary" onClick={() => this.setState({ error: null })}>
+              {i18n.t('error.retry')}
+            </Button>
+            <Button variant="outline" onClick={() => window.location.assign('/')}>
+              {i18n.t('error.home')}
+            </Button>
           </div>
         </div>
-      );
-    }
-
-    return this.props.children;
+      </div>
+    );
   }
 }

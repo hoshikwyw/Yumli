@@ -1,41 +1,22 @@
-import { Link } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
-import { fonts } from '../themes/font';
+import { useTranslation } from 'react-i18next';
 import { Container, Button } from '../components/common';
 
 export default function NotFound() {
-  const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
-    <div style={{ backgroundColor: colors.bgPrimary }} className="min-h-[70vh] flex items-center justify-center pixel-hearts">
+    <div className="bg-bg pixel-hearts min-h-[70vh] flex items-center justify-center py-12">
       <Container>
-        <div className="text-center space-y-5 max-w-md mx-auto px-4">
-          <div
-            style={{ ...fonts.heroTitle, color: colors.primaryPastel, fontSize: undefined }}
-            className="text-5xl sm:text-7xl"
-          >
+        <div className="text-center max-w-md mx-auto">
+          <div className="font-pixel text-primary text-5xl sm:text-7xl leading-none" aria-hidden="true">
             404
           </div>
-          <div className="text-4xl">🍳</div>
-          <h1
-            style={{ ...fonts.h2, color: colors.textPrimary, fontSize: undefined }}
-            className="text-sm sm:text-base"
-          >
-            Page Not Found
-          </h1>
-          <p
-            style={{ color: colors.textMuted, fontFamily: "'Nunito', sans-serif", lineHeight: '1.7' }}
-            className="text-xs sm:text-sm"
-          >
-            Oops! This page must have wandered off to the kitchen. Let's get you back to somewhere delicious.
-          </p>
-          <div className="flex gap-3 justify-center pt-2">
-            <Link to="/">
-              <Button variant="primary" size="md">GO HOME</Button>
-            </Link>
-            <Link to="/recipes">
-              <Button variant="outline" size="md">RECIPES</Button>
-            </Link>
+          <div className="text-5xl mt-5" aria-hidden="true">🍳</div>
+          <h1 className="text-title text-ink mt-5">{t('notFound.title')}</h1>
+          <p className="text-lead text-ink-soft mt-3">{t('notFound.text')}</p>
+          <div className="flex flex-col sm:flex-row gap-3 sm:justify-center mt-7">
+            <Button to="/" variant="primary">{t('notFound.home')}</Button>
+            <Button to="/recipes" variant="outline">{t('notFound.recipes')}</Button>
           </div>
         </div>
       </Container>
