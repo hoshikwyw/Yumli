@@ -47,7 +47,7 @@ export const colors: ColorScheme = {
     // ── Text ──
     textPrimary: "#2B2B3D",
     textSecondary: "#57534E",
-    textMuted: "#A8A29E",
+    textMuted: "#6B645E",
     textAccent: "#FF7B7B",
     textLight: "#FFFFFF",
 
@@ -110,22 +110,22 @@ export const darkColors: ColorScheme = {
 
     textPrimary: "#E8E5E0",
     textSecondary: "#B8B0C8",
-    textMuted: "#6B6580",
+    textMuted: "#A39BB5",
     textLight: "#1A1A2E",
 
     bgPrimary: "#1A1A2E",
-    bgCard: "#1E1E36",
+    bgCard: "#232340",
     bgGradientStart: "#1A1A2E",
     bgGradientEnd: "#16213E",
-    bgLight: "#1E1E36",
+    bgLight: "#232340",
     bgCream: "#1A1A2E",
     bgOverlay: "rgba(0, 0, 0, 0.6)",
 
     pixelShadow: "#0D0D1A",
-    pixelBorder: "#E8E5E0",
+    pixelBorder: "#B9B2CC",
     pixelBorderLight: "#3D3955",
 
-    cardBg: "#1E1E36",
+    cardBg: "#232340",
     cardBgAlt: "#16213E",
     surfaceLight: "#1E1E36",
 

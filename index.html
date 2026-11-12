@@ -2,12 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <!-- App Meta -->
     <title>Yumli</title>
     <meta name="description" content="Your cozy kitchen companion. Simple recipes, cute vibes, no stress." />
-    <meta name="theme-color" content="#FF7B7B" />
+    <meta name="theme-color" content="#FFF9F5" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Apply the saved theme and language before first paint, so the page never flashes the wrong one. -->
+    <script>
+      (function () {
+        try {
+          var root = document.documentElement;
+          var theme = localStorage.getItem('yumli_theme');
+          if (theme !== 'dark' && theme !== 'light') {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          root.setAttribute('data-theme', theme);
+          if (localStorage.getItem('yumli_lang') === 'mm') root.lang = 'my';
+        } catch (e) { /* storage blocked: keep the defaults */ }
+      })();
+    </script>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -16,11 +32,11 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
-    <!-- Fonts -->
+    <!-- Fonts: Nunito for text, Noto Sans Myanmar for Burmese (only downloaded when Burmese is shown), Press Start 2P for the logo -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300..900;1,300..900&family=Press+Start+2P&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;600;700;800&family=Nunito:wght@400..900&family=Press+Start+2P&display=swap"
       rel="stylesheet"
     />
   </head>

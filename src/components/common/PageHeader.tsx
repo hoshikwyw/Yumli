@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
-import { useTheme } from '../../context/ThemeContext';
-import { fonts } from '../../themes/font';
+import Container from './Container';
 
 interface PageHeaderProps {
   title: string;
@@ -9,30 +8,15 @@ interface PageHeaderProps {
 }
 
 export default function PageHeader({ title, subtitle, children }: PageHeaderProps) {
-  const { colors } = useTheme();
-
   return (
-    <section
-      style={{ backgroundColor: colors.bgPrimary }}
-      className="py-10 sm:py-14 md:py-20 pixel-cross relative"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        <h1
-          style={{ ...fonts.h1, color: colors.textPrimary, fontSize: undefined }}
-          className="mb-3 sm:mb-4 text-base sm:text-lg md:text-2xl"
-        >
-          {title}
-        </h1>
+    <section className="relative bg-bg pixel-cross py-8 sm:py-12 md:py-16">
+      <Container className="relative z-10 text-center">
+        <h1 className="text-title text-ink">{title}</h1>
         {subtitle && (
-          <p
-            style={{ ...fonts.bodyLarge, color: colors.textSecondary, fontSize: undefined }}
-            className="max-w-2xl mx-auto text-sm sm:text-base md:text-lg"
-          >
-            {subtitle}
-          </p>
+          <p className="text-lead text-ink-soft max-w-2xl mx-auto mt-2 sm:mt-3">{subtitle}</p>
         )}
         {children}
-      </div>
+      </Container>
       <div className="absolute bottom-0 left-0 right-0 pixel-divider-primary" />
     </section>
   );

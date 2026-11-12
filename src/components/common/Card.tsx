@@ -1,5 +1,4 @@
 import type { ReactNode, CSSProperties } from 'react';
-import { useTheme } from '../../context/ThemeContext';
 
 type CardVariant = 'default' | 'pixel' | 'pastel-pink' | 'pastel-lavender' | 'pastel-mint' | 'pastel-yellow';
 
@@ -8,8 +7,18 @@ interface CardProps {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
+  /** Lift on hover and sink on press: for cards that are themselves clickable. */
   hover?: boolean;
 }
+
+const variants: Record<CardVariant, string> = {
+  default: 'bg-surface pixel-box',
+  pixel: 'bg-surface pixel-box',
+  'pastel-pink': 'bg-primary-soft pixel-box-primary',
+  'pastel-lavender': 'bg-secondary-soft pixel-box-secondary',
+  'pastel-mint': 'bg-accent-soft pixel-box-accent',
+  'pastel-yellow': 'bg-warm-soft pixel-box-warm',
+};
 
 export default function Card({
   variant = 'default',
@@ -18,49 +27,10 @@ export default function Card({
   style,
   hover = false,
 }: CardProps) {
-  const { colors } = useTheme();
-
-  const variantStyles: Record<CardVariant, CSSProperties> = {
-    default: {
-      backgroundColor: colors.cardBg,
-      border: `3px solid ${colors.pixelBorder}`,
-      boxShadow: `4px 4px 0px ${colors.pixelBorder}`,
-    },
-    pixel: {
-      backgroundColor: colors.cardBg,
-      border: `3px solid ${colors.pixelBorder}`,
-      boxShadow: `4px 4px 0px ${colors.pixelBorder}`,
-    },
-    'pastel-pink': {
-      backgroundColor: colors.pastelPink,
-      border: `3px solid ${colors.primary}`,
-      boxShadow: `4px 4px 0px ${colors.primary}`,
-    },
-    'pastel-lavender': {
-      backgroundColor: colors.pastelLavender,
-      border: `3px solid ${colors.secondary}`,
-      boxShadow: `4px 4px 0px ${colors.secondary}`,
-    },
-    'pastel-mint': {
-      backgroundColor: colors.accentPastel,
-      border: `3px solid ${colors.accent}`,
-      boxShadow: `4px 4px 0px ${colors.accent}`,
-    },
-    'pastel-yellow': {
-      backgroundColor: colors.pastelYellow,
-      border: `3px solid ${colors.warm}`,
-      boxShadow: `4px 4px 0px ${colors.warm}`,
-    },
-  };
-
   return (
     <div
-      style={{
-        ...variantStyles[variant],
-        overflow: 'hidden',
-        ...style,
-      }}
-      className={`${hover ? 'pixel-hover' : ''} ${className}`}
+      style={style}
+      className={`overflow-hidden text-ink ${variants[variant]} ${hover ? 'pixel-press' : ''} ${className}`}
     >
       {children}
     </div>

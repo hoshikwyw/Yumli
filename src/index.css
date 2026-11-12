@@ -1,40 +1,58 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════
-   CUTE PIXEL ART THEME — Global Styles
-   cozy kitchen vibes for a solo chef <3
+   YUMLI — design foundation
+   Cute pixel look, but readable for every age:
+   - one set of colour tokens, flipped for dark mode
+   - text never below 13px, body at 16px
+   - every text/background pair meets WCAG AA (4.5:1)
    ═══════════════════════════════════════════ */
 
+/* `dark:` follows the data-theme attribute set by ThemeContext */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme {
-  /* ── Colors ── */
+  /* ── Brand fills (backgrounds, borders, decoration) ── */
   --color-primary: #FF7B7B;
-  --color-primary-dark: #E85D5D;
-  --color-primary-light: #FFA8A8;
-  --color-primary-pastel: #FFD4D4;
-
+  --color-primary-strong: #E85D5D;
+  --color-primary-soft: #FFD4D4;
   --color-secondary: #B8A9E8;
-  --color-secondary-dark: #9580D6;
-  --color-secondary-light: #D4C8F5;
-  --color-secondary-pastel: #EDE7FF;
-
+  --color-secondary-soft: #EDE7FF;
   --color-accent: #7ECFB3;
-  --color-accent-dark: #5BB89A;
-  --color-accent-light: #B0E8D5;
-
+  --color-accent-soft: #DDFAF0;
   --color-warm: #FFD98E;
+  --color-warm-soft: #FFF7E6;
   --color-sky: #8ECAE6;
+  --color-sky-soft: #E6F4FA;
 
+  /* ── Brand colours dark enough to be used as TEXT on the page ── */
+  --color-primary-ink: #C2374A;
+  --color-secondary-ink: #6D55C4;
+  --color-accent-ink: #1F7A5C;
+  --color-warm-ink: #8A5A00;
+
+  /* ── Surfaces ── */
   --color-bg: #FFF9F5;
   --color-surface: #FFFFFF;
-  --color-pixel: #2B2B3D;
+  --color-surface-alt: #F5F3F0;
 
-  --color-text-primary: #2B2B3D;
-  --color-text-secondary: #57534E;
-  --color-text-muted: #A8A29E;
+  /* ── Text ── */
+  --color-ink: #2B2B3D;
+  --color-ink-soft: #57534E;
+  --color-ink-muted: #6B645E;
+  /* text sitting on a brand fill (coral, lavender, mint): dark in both themes */
+  --color-on-fill: #2B2B3D;
+
+  /* ── Lines and pixel shadows ── */
+  --color-line: #2B2B3D;
+  --color-line-soft: #E8E5E0;
+  --color-shadow: #2B2B3D;
+  --color-focus: #6D55C4;
 
   /* ── Fonts ── */
+  --font-body: 'Nunito', 'Noto Sans Myanmar', system-ui, sans-serif;
+  /* Logo and big decorative numbers only: too hard to read as running text */
   --font-pixel: 'Press Start 2P', monospace;
-  --font-body: 'Nunito', sans-serif;
 
   /* ── Border radius ── */
   --radius-pixel: 4px;
@@ -42,95 +60,237 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
+}
 
-  /* ── Shadows — pixel-style stepped shadows ── */
-  --shadow-pixel: 4px 4px 0px #2B2B3D;
-  --shadow-pixel-sm: 2px 2px 0px #2B2B3D;
-  --shadow-pixel-lg: 6px 6px 0px #2B2B3D;
-  --shadow-pixel-color: 4px 4px 0px #FF7B7B;
-  --shadow-soft: 0 2px 12px rgba(43, 43, 61, 0.06);
-  --shadow-card: 0 4px 20px rgba(43, 43, 61, 0.08);
+/* ── Dark theme: same tokens, new values ── */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-primary-soft: #3D1F2E;
+  --color-secondary-soft: #2A2440;
+  --color-accent-soft: #1A3330;
+  --color-warm-soft: #3D3320;
+  --color-sky-soft: #1A2D3D;
+
+  --color-primary-ink: #FF9B9B;
+  --color-secondary-ink: #C9BDF2;
+  --color-accent-ink: #8EDCC2;
+  --color-warm-ink: #FFD98E;
+
+  --color-bg: #1A1A2E;
+  --color-surface: #232340;
+  --color-surface-alt: #2C2C4A;
+
+  --color-ink: #F1EEE9;
+  --color-ink-soft: #C9C2D6;
+  --color-ink-muted: #A39BB5;
+
+  --color-line: #B9B2CC;
+  --color-line-soft: #3D3955;
+  --color-shadow: #0B0B16;
+  --color-focus: #C9BDF2;
 }
 
 /* ── Base ── */
 @layer base {
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+    /* keeps anchor targets clear of the sticky header */
+    scroll-padding-top: 5rem;
+  }
+
   body {
-    @apply font-body text-text-primary antialiased;
-    background-color: #FFF9F5;
+    @apply font-body antialiased;
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-size: 1rem;
+    line-height: 1.65;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Burmese script is taller than Latin: give it room, and never letter-space it */
+  :lang(my) body {
+    line-height: 1.9;
+  }
+  :lang(my) * {
+    letter-spacing: 0 !important;
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+
+  button, a, [role="button"], summary, label[for], select {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  /* One clear keyboard focus ring everywhere */
+  :focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-primary-soft);
+    color: var(--color-ink);
+  }
+
+  ::placeholder {
+    color: var(--color-ink-muted);
+    opacity: 1;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-primary-soft);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
   }
 
   .pixel-render {
     image-rendering: pixelated;
     image-rendering: crisp-edges;
   }
+}
 
-  ::selection {
-    background-color: #FFD4D4;
-    color: #2B2B3D;
-  }
+/* ── Type scale: mobile first, grows smoothly with the screen ── */
+@utility text-display {
+  font-size: clamp(2rem, 1.4rem + 3.2vw, 3.25rem);
+  line-height: 1.15;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+@utility text-title {
+  font-size: clamp(1.625rem, 1.3rem + 1.6vw, 2.25rem);
+  line-height: 1.2;
+  font-weight: 900;
+}
+@utility text-heading {
+  font-size: clamp(1.3125rem, 1.15rem + 0.8vw, 1.625rem);
+  line-height: 1.3;
+  font-weight: 800;
+}
+@utility text-subheading {
+  font-size: 1.125rem;
+  line-height: 1.4;
+  font-weight: 800;
+}
+@utility text-lead {
+  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+  line-height: 1.7;
+}
+/* small uppercase label above a heading or a value */
+@utility text-eyebrow {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 
-  ::-webkit-scrollbar {
-    width: 6px;
+/* ── Pixel boxes: hard border + stepped shadow ── */
+@utility pixel-box {
+  --pixel-depth: 4px;
+  --pixel-shadow: var(--color-shadow);
+  border: 3px solid var(--color-line);
+  box-shadow: var(--pixel-depth) var(--pixel-depth) 0 var(--pixel-shadow);
+}
+@utility pixel-box-sm {
+  --pixel-depth: 2px;
+  --pixel-shadow: var(--color-shadow);
+  border: 2px solid var(--color-line);
+  box-shadow: var(--pixel-depth) var(--pixel-depth) 0 var(--pixel-shadow);
+}
+@utility pixel-box-primary {
+  --pixel-depth: 4px;
+  --pixel-shadow: var(--color-primary);
+  border: 3px solid var(--color-primary);
+  box-shadow: var(--pixel-depth) var(--pixel-depth) 0 var(--pixel-shadow);
+}
+@utility pixel-box-secondary {
+  --pixel-depth: 4px;
+  --pixel-shadow: var(--color-secondary);
+  border: 3px solid var(--color-secondary);
+  box-shadow: var(--pixel-depth) var(--pixel-depth) 0 var(--pixel-shadow);
+}
+@utility pixel-box-accent {
+  --pixel-depth: 4px;
+  --pixel-shadow: var(--color-accent);
+  border: 3px solid var(--color-accent);
+  box-shadow: var(--pixel-depth) var(--pixel-depth) 0 var(--pixel-shadow);
+}
+@utility pixel-box-warm {
+  --pixel-depth: 4px;
+  --pixel-shadow: var(--color-warm);
+  border: 3px solid var(--color-warm);
+  box-shadow: var(--pixel-depth) var(--pixel-depth) 0 var(--pixel-shadow);
+}
+
+/* Lift on hover (mouse only, so it never sticks on touch), sink on press.
+   Use together with one of the pixel-box utilities. */
+@utility pixel-press {
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+  @media (hover: hover) {
+    &:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: calc(var(--pixel-depth, 4px) + 2px) calc(var(--pixel-depth, 4px) + 2px) 0 var(--pixel-shadow, var(--color-shadow));
+    }
   }
-  ::-webkit-scrollbar-track {
-    background: #FFF9F5;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #FFD4D4;
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #FFA8A8;
+  &:active {
+    transform: translate(var(--pixel-depth, 4px), var(--pixel-depth, 4px));
+    box-shadow: 0 0 0 var(--pixel-shadow, var(--color-shadow));
   }
 }
 
-/* ── Pixel border utility classes ── */
+/* Room for the notch / home bar on phones */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Horizontal scroller without a visible scrollbar (filter chips, thumbnails) */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @layer utilities {
-  .pixel-border {
-    border: 3px solid #2B2B3D;
-    box-shadow: 4px 4px 0px #2B2B3D;
-  }
-
-  .pixel-border-sm {
-    border: 2px solid #2B2B3D;
-    box-shadow: 2px 2px 0px #2B2B3D;
-  }
-
-  .pixel-border-primary {
-    border: 3px solid #FF7B7B;
-    box-shadow: 4px 4px 0px #FF7B7B;
-  }
-
-  .pixel-border-secondary {
-    border: 3px solid #B8A9E8;
-    box-shadow: 4px 4px 0px #B8A9E8;
-  }
-
-  .pixel-border-accent {
-    border: 3px solid #7ECFB3;
-    box-shadow: 4px 4px 0px #7ECFB3;
-  }
-
-  /* Hover: shift shadow to simulate press */
+  /* Legacy hover used by pages not yet moved to pixel-press */
   .pixel-hover {
     transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
-  .pixel-hover:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px #2B2B3D;
+  @media (hover: hover) {
+    .pixel-hover:hover {
+      transform: translate(-2px, -2px);
+    }
   }
   .pixel-hover:active {
     transform: translate(2px, 2px);
-    box-shadow: 0px 0px 0px #2B2B3D;
   }
 
-  /* Pixel divider */
+  /* Pixel dividers */
   .pixel-divider {
     height: 4px;
     background: repeating-linear-gradient(
       90deg,
-      #2B2B3D 0px,
-      #2B2B3D 4px,
+      var(--color-line) 0px,
+      var(--color-line) 4px,
       transparent 4px,
       transparent 8px
     );
@@ -140,32 +300,24 @@
     height: 4px;
     background: repeating-linear-gradient(
       90deg,
-      #FF7B7B 0px,
-      #FF7B7B 4px,
+      var(--color-primary) 0px,
+      var(--color-primary) 4px,
       transparent 4px,
       transparent 8px
     );
   }
 
-  /* Dotted pixel background pattern */
-  .pixel-dots {
-    background-image: radial-gradient(circle, #FFD4D4 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-
-  /* Cross pattern background */
+  /* Background patterns: decoration only, kept very faint so text stays readable */
   .pixel-cross {
     background-image:
       url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23FF7B7B' fill-opacity='0.04'%3E%3Crect x='7' y='4' width='2' height='8'/%3E%3Crect x='4' y='7' width='8' height='2'/%3E%3C/g%3E%3C/svg%3E");
   }
 
-  /* Heart pattern background — cute subtle hearts */
   .pixel-hearts {
     background-image:
       url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23FF7B7B' fill-opacity='0.04'%3E%3Crect x='10' y='6' width='4' height='2'/%3E%3Crect x='18' y='6' width='4' height='2'/%3E%3Crect x='8' y='8' width='2' height='2'/%3E%3Crect x='14' y='8' width='4' height='2'/%3E%3Crect x='22' y='8' width='2' height='2'/%3E%3Crect x='8' y='10' width='16' height='2'/%3E%3Crect x='10' y='12' width='12' height='2'/%3E%3Crect x='12' y='14' width='8' height='2'/%3E%3Crect x='14' y='16' width='4' height='2'/%3E%3Crect x='15' y='18' width='2' height='2'/%3E%3C/g%3E%3C/svg%3E");
   }
 
-  /* Sparkle pattern */
   .pixel-sparkles {
     background-image:
       url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23FFD98E' fill-opacity='0.08'%3E%3Crect x='19' y='16' width='2' height='8'/%3E%3Crect x='16' y='19' width='8' height='2'/%3E%3Crect x='18' y='18' width='1' height='1'/%3E%3Crect x='21' y='18' width='1' height='1'/%3E%3Crect x='18' y='21' width='1' height='1'/%3E%3Crect x='21' y='21' width='1' height='1'/%3E%3C/g%3E%3C/svg%3E");
@@ -178,16 +330,6 @@
   50% { transform: translateY(-8px); }
 }
 
-@keyframes bounce-pixel {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
-@keyframes blink-cursor {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
 @keyframes slide-up {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
@@ -198,12 +340,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-3deg); }
-  75% { transform: rotate(3deg); }
-}
-
 @keyframes heartbeat {
   0%, 100% { transform: scale(1); }
   15% { transform: scale(1.15); }
@@ -211,27 +347,18 @@
   45% { transform: scale(1.1); }
 }
 
-@keyframes sparkle-in {
-  0% { opacity: 0; transform: scale(0) rotate(0deg); }
-  50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
-  100% { opacity: 0; transform: scale(0) rotate(360deg); }
-}
-
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes pulse-pixel {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 .animate-float {
   animation: float 3s ease-in-out infinite;
-}
-
-.animate-bounce-pixel {
-  animation: bounce-pixel 1s steps(2) infinite;
-}
-
-.animate-blink {
-  animation: blink-cursor 1s steps(1) infinite;
 }
 
 .animate-slide-up {
@@ -242,16 +369,16 @@
   animation: slide-down 0.3s ease-out forwards;
 }
 
-.animate-wiggle {
-  animation: wiggle 0.5s ease-in-out;
-}
-
 .animate-heartbeat {
   animation: heartbeat 1.2s ease-in-out infinite;
 }
 
 .animate-fade-in-up {
   animation: fade-in-up 0.5s ease-out forwards;
+}
+
+.animate-pulse-pixel {
+  animation: pulse-pixel 1.5s ease-in-out infinite;
 }
 
 /* Staggered animation delays for child elements */
@@ -267,48 +394,27 @@
   animation: slide-up 0.35s ease-out forwards;
 }
 
-/* Skeleton pulse */
-@keyframes pulse-pixel {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
 /* Heart favorite pop */
 .heart-pop {
   transition: transform 0.15s ease;
 }
-.heart-pop:hover {
-  transform: scale(1.1);
+@media (hover: hover) {
+  .heart-pop:hover {
+    transform: scale(1.1);
+  }
 }
 .heart-pop:active {
   transform: scale(0.9);
 }
 
-/* Cute cursor on interactive elements */
-button, a, [role="button"] {
-  cursor: pointer;
-}
-
-/* ═══════════════════════════════════════════
-   DARK MODE
-   ═══════════════════════════════════════════ */
-[data-theme="dark"] body {
-  background-color: #1A1A2E;
-  color: #E8E5E0;
-}
-
-[data-theme="dark"] ::selection {
-  background-color: #FF7B7B;
-  color: #1A1A2E;
-}
-
-[data-theme="dark"] ::-webkit-scrollbar-track {
-  background: #1A1A2E;
-}
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background: #3D3955;
-  border-color: #1A1A2E;
-}
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-  background: #5A5478;
+/* People who ask their device for less motion get none: animations jump
+   straight to their end state, so nothing is left hidden mid-fade. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
