@@ -1,16 +1,6 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import * as authService from '../services/authService';
-
-interface AuthContextType {
-  isLoggedIn: boolean;
-  /** True until the server has said whether the session cookie is valid. */
-  checking: boolean;
-  /** Resolves to an error message, or null when the login worked. */
-  login: (username: string, password: string) => Promise<string | null>;
-  logout: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextType | null>(null);
+import { AuthContext } from './AuthContext';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -39,10 +29,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth(): AuthContextType {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
-  return ctx;
 }

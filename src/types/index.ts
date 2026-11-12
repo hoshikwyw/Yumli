@@ -26,19 +26,3 @@ export interface Category {
   icon?: string;
 }
 
-export interface User {
-  id: string;
-  email: string;
-  displayName: string;
-  avatar?: string;
-  createdAt: string;
-}
-
-export interface Review {
-  id: string;
-  recipeId: string;
-  userId: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-}

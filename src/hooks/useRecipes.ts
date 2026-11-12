@@ -46,11 +46,6 @@ export function useRecipes() {
   return { recipes: data, loading, error, reload };
 }
 
-export function useFeaturedRecipes() {
-  const { data, loading, error, reload } = useAsync(recipeService.getFeaturedRecipes, NO_RECIPES);
-  return { recipes: data, loading, error, reload };
-}
-
 /** The page showing a recipe remounts when the id changes, so each id starts in the loading state. */
 export function useRecipeById(id: string) {
   const load = useCallback(

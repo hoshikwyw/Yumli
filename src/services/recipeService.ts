@@ -33,8 +33,6 @@ const send = <T>(path: string, method: string, data?: unknown) =>
 
 export const getRecipes = () => api<Recipe[]>('recipes');
 
-export const getFeaturedRecipes = () => api<Recipe[]>('recipes?featured=1');
-
 export async function getRecipeById(id: string): Promise<Recipe | null> {
   try {
     return await api<Recipe>(`recipes?id=${encodeURIComponent(id)}`);
@@ -45,16 +43,7 @@ export async function getRecipeById(id: string): Promise<Recipe | null> {
   }
 }
 
-export const searchRecipes = (query: string) =>
-  api<Recipe[]>(`recipes?q=${encodeURIComponent(query)}`);
-
-export const getRecipesByCategory = (category: string) =>
-  api<Recipe[]>(`recipes?category=${encodeURIComponent(category)}`);
-
 export const getCategories = () => api<Category[]>('categories');
-
-/** The recipe as stored, for the edit form. The public view carries every field it needs. */
-export const getRawRecipeById = getRecipeById;
 
 // ── Writes (admin) ──
 

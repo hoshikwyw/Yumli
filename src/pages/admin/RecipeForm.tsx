@@ -61,7 +61,7 @@ export default function RecipeForm() {
   useEffect(() => {
     if (!id) return;
     let stale = false;
-    recipeService.getRawRecipeById(id)
+    recipeService.getRecipeById(id)
       .then((data) => {
         if (stale) return;
         if (!data) { setLoadState('missing'); return; }

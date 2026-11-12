@@ -22,7 +22,7 @@ export const fieldClasses =
   'focus:outline-none focus:border-primary focus:shadow-[3px_3px_0_var(--color-primary)] ' +
   'aria-[invalid=true]:border-primary-ink disabled:opacity-60';
 
-export const labelClasses = 'block mb-1.5 text-sm font-extrabold tracking-wide text-ink';
+const labelClasses = 'block mb-1.5 text-sm font-extrabold tracking-wide text-ink';
 
 interface FieldShellProps extends FieldProps {
   id: string;

@@ -1,8 +1,8 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from './context/ThemeContext';
-import { FavoritesProvider } from './context/FavoritesContext';
-import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeProvider';
+import { FavoritesProvider } from './context/FavoritesProvider';
+import { AuthProvider } from './context/AuthProvider';
 import ErrorBoundary from './components/ErrorBoundary';
 import PublicLayout from './components/layout/PublicLayout';
 import ScrollToTop from './components/layout/ScrollToTop';

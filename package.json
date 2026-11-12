@@ -11,9 +11,6 @@
     "migrate": "node --env-file=.env scripts/migrate-from-old-project.mjs"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/material": "^7.3.6",
     "@supabase/supabase-js": "^2.102.1",
     "@tailwindcss/vite": "^4.1.17",
     "i18next": "^25.7.2",

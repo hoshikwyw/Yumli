@@ -101,14 +101,13 @@ api/              # Vercel functions: recipes, categories, images, auth
   _lib/           # service-account client, session cookie, validation
 src/
   components/
-    common/       # Button, Card, Badge, Input, Select, etc.
-    Navbar.tsx
-    HeroSection.tsx
-    RecipeCard.tsx
-    ErrorBoundary.tsx
-    PageTransition.tsx
+    common/       # Button, Card, Badge, Input, Select, Chip, RecipeImage, etc.
+    layout/       # Header, BottomNav, Footer, PublicLayout, AdminLayout
+    recipe/       # ImageGallery, ingredient and step checklists
+    HeroSection.tsx, FeaturedRecipe.tsx, RecipeCard.tsx, RecipeGrid.tsx
+    icons.tsx, ErrorBoundary.tsx
   context/        # Theme, Favorites, Auth providers
-  hooks/          # useRecipes, useCategories, etc.
+  hooks/          # useRecipes, useCategoryLabel, useDocumentTitle
   locales/        # en + mm translations
   pages/
     Home.tsx
@@ -118,8 +117,9 @@ src/
     NotFound.tsx
     admin/        # Login, Dashboard, RecipeForm
   services/       # recipeService, authService (calls to /api)
-  themes/         # Color palette, font system
-  types/          # Recipe, Category, User, Review
+  index.css       # Design tokens (colours, type scale, pixel boxes), light + dark
+  types/          # Recipe, Category
+  utils/          # recipe helpers, YouTube links, error messages
 scripts/
   migrate-from-old-project.mjs   # one-time data move
 supabase/

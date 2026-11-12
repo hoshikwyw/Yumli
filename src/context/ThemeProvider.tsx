@@ -1,17 +1,5 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { colors as lightColors, darkColors, type ColorScheme } from '../themes/color';
-
-type ThemeMode = 'light' | 'dark';
-
-interface ThemeContextType {
-  mode: ThemeMode;
-  toggleMode: () => void;
-  isDark: boolean;
-  /** Legacy hex palette for inline styles. New code should use the CSS tokens in index.css. */
-  colors: ColorScheme;
-}
-
-const ThemeContext = createContext<ThemeContextType | null>(null);
+import { useState, useEffect, type ReactNode } from 'react';
+import { ThemeContext, type ThemeMode } from './ThemeContext';
 
 const STORAGE_KEY = 'yumli_theme';
 /** Browser toolbar colour per theme: matches the page background. */
@@ -28,11 +16,14 @@ function readStoredTheme(): ThemeMode | null {
 const systemTheme = (): ThemeMode =>
   window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 
+/**
+ * Owns the light/dark choice. It only sets `data-theme` on <html>; every
+ * colour is a CSS token in index.css that changes value under that attribute.
+ */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   // Until the visitor picks a theme themselves, follow their device setting.
   const [mode, setMode] = useState<ThemeMode>(() => readStoredTheme() ?? systemTheme());
   const [chosen, setChosen] = useState(() => readStoredTheme() !== null);
-  const isDark = mode === 'dark';
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', mode);
@@ -58,14 +49,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ mode, toggleMode, isDark, colors: isDark ? darkColors : lightColors }}>
+    <ThemeContext.Provider value={{ mode, isDark: mode === 'dark', toggleMode }}>
       {children}
     </ThemeContext.Provider>
   );
-}
-
-export function useTheme(): ThemeContextType {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
-  return ctx;
 }
