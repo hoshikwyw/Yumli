@@ -1,8 +1,8 @@
-import { Link, NavLink } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { GlobeIcon, MoonIcon, SunIcon } from '../icons';
-import { navItems } from './navItems';
+import { pageNavItems } from './navItems';
 
 /* Square 44px control: big enough to hit first time on a phone. */
 const controlClasses =
@@ -17,6 +17,8 @@ const controlClasses =
 export default function Header() {
   const { toggleMode, isDark } = useTheme();
   const { t, i18n } = useTranslation();
+  const { pathname, search } = useLocation();
+  const params = new URLSearchParams(search);
 
   const isBurmese = i18n.language === 'mm';
   const toggleLang = () => i18n.changeLanguage(isBurmese ? 'en' : 'mm');
@@ -33,22 +35,23 @@ export default function Header() {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <nav aria-label={t('nav.main')} className="hidden md:flex items-center gap-1 mr-2">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                end={item.end}
-                className={({ isActive }) =>
-                  `inline-flex items-center min-h-11 px-4 text-base font-extrabold no-underline border-b-[3px] transition-colors ${
-                    isActive
+            {pageNavItems.map((item) => {
+              const active = item.isActive(pathname, params);
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  aria-current={active ? 'page' : undefined}
+                  className={`inline-flex items-center min-h-11 px-4 text-base font-extrabold no-underline border-b-[3px] transition-colors ${
+                    active
                       ? 'text-primary-ink border-primary'
                       : 'text-ink border-transparent hover:text-primary-ink'
-                  }`
-                }
-              >
-                {t(item.labelKey)}
-              </NavLink>
-            ))}
+                  }`}
+                >
+                  {t(item.labelKey)}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Shows the language you would switch TO, written in that language. */}

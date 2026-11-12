@@ -1,105 +1,176 @@
-import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useRecipes, useCategories } from '../hooks/useRecipes';
-import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { fonts } from '../themes/font';
-import { PageHeader, Container, Button, Input, RecipeCardSkeleton } from '../components/common';
-import RecipeCard from '../components/RecipeCard';
+import { useRecipes } from '../hooks/useRecipes';
+import { useCategoryLabel } from '../hooks/useCategoryLabel';
+import { useFavorites } from '../context/FavoritesContext';
+import { PageHeader, Container, Button, Chip, StateMessage } from '../components/common';
+import { CloseIcon, HeartIcon, SearchIcon } from '../components/icons';
+import RecipeGrid from '../components/RecipeGrid';
+import { fieldClasses } from '../components/common/Input';
+import { categoryEmoji, isQuick } from '../utils/recipe';
+import type { Recipe } from '../types';
 
+/** Everything a visitor might type to find a recipe, in one lowercase string. */
+const searchText = (recipe: Recipe) =>
+  [recipe.title, recipe.description, recipe.category, ...(recipe.ingredients ?? [])].join(' ').toLowerCase();
+
+/**
+ * The recipe list. Search and filters live in the URL
+ * (`?q=egg&category=Breakfast&quick=1&saved=1`), so a filtered list can be
+ * shared, bookmarked, and survives the back button.
+ */
 export default function Recipes() {
-  const [searchParams] = useSearchParams();
-  const initialCategory = searchParams.get('category') ?? 'All';
-  const isQuickFilter = initialCategory === 'quick';
-
-  const [search, setSearch] = useState('');
-  const [activeCategory, setActiveCategory] = useState(isQuickFilter ? 'All' : initialCategory);
-  const [quickOnly, setQuickOnly] = useState(isQuickFilter);
-
-  const { recipes, loading } = useRecipes();
-  const { categories } = useCategories();
-  const { colors } = useTheme();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { recipes, loading, error, reload } = useRecipes();
+  const { favorites, isFavorite } = useFavorites();
   const { t } = useTranslation();
+  const categoryLabel = useCategoryLabel();
 
-  useEffect(() => {
-    const cat = searchParams.get('category') ?? 'All';
-    if (cat === 'quick') {
-      setActiveCategory('All');
-      setQuickOnly(true);
-    } else {
-      setActiveCategory(cat);
-      setQuickOnly(false);
-    }
-  }, [searchParams]);
+  const query = searchParams.get('q') ?? '';
+  const category = searchParams.get('category');
+  const quickOnly = searchParams.get('quick') === '1';
+  const savedOnly = searchParams.get('saved') === '1';
+  const hasFilters = Boolean(query || category || quickOnly || savedOnly);
 
-  const categoryNames = ['All', ...categories.map((c) => c.name)];
+  /** Change some filters and keep the rest. A null value removes that filter. */
+  const setFilters = (changes: Record<string, string | null>) => {
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        for (const [key, value] of Object.entries(changes)) {
+          if (value) next.set(key, value);
+          else next.delete(key);
+        }
+        return next;
+      },
+      // Filtering is not a new page: Back should leave the list, not undo one keystroke.
+      { replace: true },
+    );
+  };
 
-  const filtered = recipes.filter((recipe) => {
-    const matchesSearch =
-      recipe.title.toLowerCase().includes(search.toLowerCase()) ||
-      recipe.description.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = activeCategory === 'All' || recipe.category === activeCategory;
-    const matchesQuick = !quickOnly || parseInt(recipe.prep_time) <= 10;
-    return matchesSearch && matchesCategory && matchesQuick;
-  });
+  const clearFilters = () => setSearchParams({}, { replace: true });
+
+  // Offer only categories that have recipes, so no chip leads to an empty list.
+  const categories = [...new Map(recipes.filter((r) => r.category).map((r) => [r.category, r.category_slug])).entries()]
+    .sort(([a], [b]) => a.localeCompare(b));
+
+  const needle = query.trim().toLowerCase();
+  const filtered = recipes.filter(
+    (recipe) =>
+      (!needle || searchText(recipe).includes(needle)) &&
+      (!category || recipe.category === category) &&
+      (!quickOnly || isQuick(recipe)) &&
+      (!savedOnly || isFavorite(recipe.id)),
+  );
+
+  // "Saved" with no other filter and nothing saved needs its own explanation.
+  const nothingSaved = savedOnly && favorites.length === 0;
 
   return (
-    <div style={{ backgroundColor: colors.bgPrimary }}>
+    <div className="bg-bg">
       <PageHeader title={t('recipes.title')} subtitle={t('recipes.subtitle')} />
 
-      {/* Search & Filter */}
-      <section
-        style={{ backgroundColor: colors.bgLight, borderBottom: `3px solid ${colors.pixelBorder}` }}
-        className="py-4 sm:py-6"
-      >
+      {/* Search & filters */}
+      <section className="bg-surface border-b-[3px] border-line py-4 sm:py-5">
         <Container>
-          <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="w-full sm:max-w-sm">
-              <Input
-                type="text"
-                placeholder={t('recipes.search')}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {categoryNames.map((cat) => (
-                <Button
-                  key={cat}
-                  variant={activeCategory === cat && !quickOnly ? 'primary' : 'outline'}
-                  size="sm"
-                  onClick={() => { setActiveCategory(cat); setQuickOnly(false); }}
-                >
-                  {cat.toUpperCase()}
-                </Button>
-              ))}
-            </div>
+          <div role="search" className="relative sm:max-w-md">
+            <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-muted" />
+            <input
+              type="search"
+              enterKeyHint="search"
+              autoComplete="off"
+              aria-label={t('recipes.searchLabel')}
+              placeholder={t('recipes.search')}
+              value={query}
+              onChange={(e) => setFilters({ q: e.target.value || null })}
+              className={`${fieldClasses} pl-11 pr-12 [&::-webkit-search-cancel-button]:hidden`}
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setFilters({ q: null })}
+                aria-label={t('recipes.clearSearch')}
+                className="absolute right-0.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-11 h-11 text-ink-soft hover:text-ink"
+              >
+                <CloseIcon className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+
+          {/* One row that scrolls sideways on phones; wraps when there is room */}
+          <div
+            role="group"
+            aria-label={t('recipes.filters')}
+            className="mt-3 -mx-4 px-4 pt-1 pb-2 flex gap-2 overflow-x-auto scrollbar-none sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible"
+          >
+            <Chip selected={!category} onClick={() => setFilters({ category: null })}>
+              {t('recipes.all')}
+            </Chip>
+            {categories.map(([name, slug]) => (
+              <Chip key={name} selected={category === name} onClick={() => setFilters({ category: name })}>
+                <span aria-hidden="true">{categoryEmoji(slug)}</span>
+                {categoryLabel(slug, name)}
+              </Chip>
+            ))}
+            <span aria-hidden="true" className="shrink-0 w-px my-1.5 bg-line-soft" />
+            <Chip selected={quickOnly} onClick={() => setFilters({ quick: quickOnly ? null : '1' })}>
+              <span aria-hidden="true">⚡</span>
+              {t('home.pickQuick')}
+            </Chip>
+            <Chip selected={savedOnly} onClick={() => setFilters({ saved: savedOnly ? null : '1' })}>
+              <HeartIcon className="w-4 h-4" fill={savedOnly ? 'currentColor' : 'none'} />
+              {t('recipes.saved')}
+              {favorites.length > 0 && <span className="font-bold">({favorites.length})</span>}
+            </Chip>
           </div>
         </Container>
       </section>
 
-      {/* Grid */}
-      <section className="py-8 sm:py-12 md:py-16">
+      {/* Results */}
+      <section className="py-6 sm:py-10">
         <Container>
-          {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-8">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <RecipeCardSkeleton key={i} />
-              ))}
-            </div>
+          {error ? (
+            <StateMessage
+              alert
+              emoji="😕"
+              title={t('common.loadError')}
+              action={<Button variant="primary" onClick={reload}>{t('common.retry')}</Button>}
+            />
+          ) : loading ? (
+            <RecipeGrid recipes={[]} loading />
+          ) : nothingSaved ? (
+            <StateMessage
+              emoji="💗"
+              title={t('recipes.savedEmptyTitle')}
+              text={t('recipes.savedEmptyText')}
+              action={<Button variant="primary" onClick={clearFilters}>{t('common.browseRecipes')}</Button>}
+            />
           ) : filtered.length === 0 ? (
-            <div className="text-center py-16 sm:py-20">
-              <p style={{ ...fonts.h3, color: colors.textMuted }}>{t('recipes.noResults')}</p>
-              <p style={{ ...fonts.body, color: colors.textMuted }} className="mt-2 text-sm sm:text-base">
-                {t('recipes.noResultsHint')}
-              </p>
-            </div>
+            recipes.length === 0 ? (
+              <StateMessage title={t('home.emptyTitle')} text={t('home.emptyText')} />
+            ) : (
+              <StateMessage
+                emoji="🔍"
+                title={t('recipes.noResults')}
+                text={t('recipes.noResultsHint')}
+                action={<Button variant="primary" onClick={clearFilters}>{t('recipes.clearFilters')}</Button>}
+              />
+            )
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-8">
-              {filtered.map((recipe) => (
-                <RecipeCard key={recipe.id} recipe={recipe} />
-              ))}
-            </div>
+            <>
+              <div className="flex items-center justify-between gap-3 mb-4 min-h-11">
+                {/* Read out when the filters change, so screen-reader users hear the new count */}
+                <p aria-live="polite" className="text-base font-bold text-ink-soft">
+                  {t('home.recipeCount', { count: filtered.length })}
+                </p>
+                {hasFilters && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                    {t('recipes.clearFilters')}
+                  </Button>
+                )}
+              </div>
+              <RecipeGrid recipes={filtered} />
+            </>
           )}
         </Container>
       </section>

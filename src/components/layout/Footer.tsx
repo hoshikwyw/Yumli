@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { navItems } from './navItems';
+import { pageNavItems } from './navItems';
 
 /**
  * The footer is a dark band in both themes, so its colours are fixed here
@@ -27,10 +27,10 @@ export default function Footer() {
           <nav aria-label={t('footer.navigate')}>
             <h2 className="text-eyebrow text-primary mb-1">{t('footer.navigate')}</h2>
             <ul>
-              {navItems.map((item) => (
-                <li key={item.path}>
+              {pageNavItems.map((item) => (
+                <li key={item.to}>
                   <Link
-                    to={item.path}
+                    to={item.to}
                     className="inline-flex items-center min-h-11 text-base font-semibold text-[#C9C2D6] no-underline hover:text-white hover:underline underline-offset-4"
                   >
                     {t(item.labelKey)}

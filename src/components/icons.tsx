@@ -97,3 +97,16 @@ export const ArrowRightIcon = (props: IconProps) => (
     <path d="M13 6l6 6-6 6" />
   </Icon>
 );
+
+export const SearchIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <circle cx="11" cy="11" r="7" />
+    <path d="M20 20l-3.8-3.8" />
+  </Icon>
+);
+
+export const CloseIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M6 6l12 12M18 6L6 18" />
+  </Icon>
+);

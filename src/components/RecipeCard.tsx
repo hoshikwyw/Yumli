@@ -47,7 +47,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
         </h3>
 
         {/* Short teaser: only where the card is wide enough for it to read well */}
-        <p className="hidden sm:block mt-1 text-sm text-ink-muted line-clamp-2">{recipe.description}</p>
+        <p className="hidden sm:block mt-1 text-sm leading-relaxed text-ink-muted line-clamp-2">{recipe.description}</p>
 
         <div className="mt-auto pt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold text-ink-soft">
           {recipe.prep_time && (

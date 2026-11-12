@@ -8,7 +8,8 @@
     "language": "Change language",
     "darkMode": "Switch to dark mode",
     "lightMode": "Switch to light mode",
-    "admin": "Admin"
+    "admin": "Admin",
+    "saved": "Saved"
   },
   "hero": {
     "tagline": "Your cozy kitchen companion",
@@ -42,13 +43,17 @@
     "title": "Recipe Collection",
     "subtitle": "Your personal cookbook \u2014 pick something that makes you happy today",
     "search": "What are you craving?",
-    "noResults": "NOTHING HERE YET",
-    "noResultsHint": "Try searching for something else!",
-    "all": "ALL",
-    "view": "VIEW",
+    "noResults": "No recipes found",
+    "noResultsHint": "Try another word, or clear the filters to see everything.",
+    "all": "All",
     "letsCook": "Cook this",
-    "prep": "PREP",
-    "cook": "COOK"
+    "saved": "Saved",
+    "searchLabel": "Search recipes",
+    "clearSearch": "Clear search",
+    "filters": "Filter recipes",
+    "clearFilters": "Clear filters",
+    "savedEmptyTitle": "No saved recipes yet",
+    "savedEmptyText": "Tap the heart on any recipe to keep it here."
   },
   "recipeDetail": {
     "notFound": "OOPS!",

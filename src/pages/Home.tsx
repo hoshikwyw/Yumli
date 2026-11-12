@@ -7,7 +7,7 @@ import { ArrowRightIcon } from '../components/icons';
 import { Button, Container, Skeleton, StateMessage } from '../components/common';
 import { useRecipes } from '../hooks/useRecipes';
 import { useCategoryLabel } from '../hooks/useCategoryLabel';
-import { QUICK_FILTER, categoryEmoji, isQuick } from '../utils/recipe';
+import { categoryEmoji, isQuick } from '../utils/recipe';
 import type { Recipe } from '../types';
 
 /** How many recipes the home page shows before sending people to the full list. */
@@ -29,8 +29,8 @@ interface Pick {
   emoji: string;
   label: string;
   count: number;
-  /** Value for /recipes?category= */
-  filter: string;
+  /** The recipe list, filtered to this pick. */
+  to: string;
 }
 
 /** One tile per category that actually has recipes, biggest first. */
@@ -46,7 +46,7 @@ function categoryPicks(recipes: Recipe[], label: (slug: string | undefined, name
         emoji: categoryEmoji(recipe.category_slug),
         label: label(recipe.category_slug, recipe.category),
         count: 1,
-        filter: recipe.category,
+        to: `/recipes?category=${encodeURIComponent(recipe.category)}`,
       });
     }
   }
@@ -68,7 +68,7 @@ export default function Home() {
   const quickCount = recipes.filter(isQuick).length;
   const picks: Pick[] = [
     ...(quickCount > 0
-      ? [{ key: QUICK_FILTER, emoji: '⚡', label: t('home.pickQuick'), count: quickCount, filter: QUICK_FILTER }]
+      ? [{ key: 'quick', emoji: '⚡', label: t('home.pickQuick'), count: quickCount, to: '/recipes?quick=1' }]
       : []),
     ...categoryPicks(recipes, categoryLabel),
   ];
@@ -112,7 +112,7 @@ export default function Home() {
                     : picks.map((pick, i) => (
                         <li key={pick.key} className={TILE_SIZE}>
                           <Link
-                            to={`/recipes?category=${encodeURIComponent(pick.filter)}`}
+                            to={pick.to}
                             className={`flex flex-col items-center justify-center h-full min-h-[124px] p-3 text-center no-underline pixel-press ${TILE_TONES[i % TILE_TONES.length]}`}
                           >
                             <span className="text-3xl" aria-hidden="true">{pick.emoji}</span>

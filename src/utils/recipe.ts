@@ -3,9 +3,6 @@ import type { Recipe } from '../types';
 /** Recipes at or under this many minutes of prep count as "quick". */
 export const QUICK_MINUTES = 10;
 
-/** The value of `?category=` that means "quick recipes" instead of a real category. */
-export const QUICK_FILTER = 'quick';
-
 /** Prep time is free text ("10 min"); its leading number is the minutes. */
 export const isQuick = (recipe: Recipe) => parseInt(recipe.prep_time, 10) <= QUICK_MINUTES;
 
